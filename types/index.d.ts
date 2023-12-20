@@ -46,3 +46,21 @@ export interface BadgeCounts {
 }
 
 export type BadgeCriteriaType = keyof typeof BADGE_CRITERIA;
+
+export interface IQuestionProps {
+  _id: string;
+  title: string;
+  tags: {
+    _id: string;
+    name: string;
+  }[];
+  author: {
+    _id: string;
+    name: string;
+    picture: string;
+  };
+  upvotes: number;
+  views: number;
+  answers: any[];
+  createdAt: Date;
+}

@@ -71,3 +71,9 @@ export const BADGE_CRITERIA = {
     GOLD: 100000,
   },
 };
+
+export enum ICON_POSITION {
+  LEFT = "left",
+  RIGHT = "right"
+}
+
