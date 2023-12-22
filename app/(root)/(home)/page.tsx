@@ -6,41 +6,14 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import { Button } from "@/components/ui/button";
 import { ICON_POSITION } from "@/constants";
 import { HomePageFilters } from "@/constants/filters";
-import { IQuestionProps } from "@/types";
+import { getQuestions } from "@/lib/actions/question.action";
 import Link from "next/link";
 
+export default async function Home() {
+  const result = await getQuestions({});
 
+  console.log(result.questions);
 
-const questions: IQuestionProps[] = [
-  {
-    _id: "1",
-    title: "Cascading Deletes in SQLAlchemy?",
-    tags: [
-      { _id: "1", name: "python" },
-      { _id: "2", name: "sql" },
-    ],
-    author: { _id: "1", name: "John Doe", picture: "/assets/images/logo.png" },
-    upvotes: 101506,
-    views: 1000007,
-    answers: [],
-    createdAt: new Date("2022-12-01T12:00:00.000Z"),
-  },
-  {
-    _id: "2",
-    title: "How to center a div?",
-    tags: [
-      { _id: "3", name: "html" },
-      { _id: "4", name: "css" },
-    ],
-    author: { _id: "2", name: "Jane Smith", picture: "/assets/images/logo.png" },
-    upvotes: 35550,
-    views: 150000002,
-    answers: [],
-    createdAt: new Date("2023-09-02T10:30:00.000Z"),
-  },
-];
-
-export default function Home() {
   return (
     <>
       <div className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
@@ -67,9 +40,20 @@ export default function Home() {
       </div>
       <HomeFilters />
       <div className="mt-10 flex w-full flex-col gap-6">
-        {questions.length > 0 ? (
-          questions.map((item) => (
-            <QuestionCard key={item._id} question={item} />
+        {result.questions.length > 0 ? (
+          result.questions.map((item) => (
+            <QuestionCard
+              key={item._id}
+              _id={item._id}
+              title={item.title}
+              tags={item.tags}
+              author={item.author}
+              upvotes={item.upvotes}
+              views={item.views}
+              answers={item.answers}
+              createdAt={item.createdAt}
+              clerkId={item.author.clerkId || null}
+            />
           ))
         ) : (
           <NoResult

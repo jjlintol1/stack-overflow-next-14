@@ -6,7 +6,7 @@ export interface SidebarLink {
   label: string;
 }
 
-export interface Job {
+export interface IJob {
   id?: string;
   employer_name?: string;
   employer_logo?: string | undefined;
@@ -20,26 +20,26 @@ export interface Job {
   job_country?: string;
 }
 
-export interface Country {
+export interface ICountry {
   name: {
     common: string;
   };
 }
 
-export interface ParamsProps {
+export interface IParamsProps {
   params: { id: string };
 }
 
-export interface SearchParamsProps {
+export interface ISearchParamsProps {
   searchParams: { [key: string]: string | undefined };
 }
 
-export interface URLProps {
+export interface IURLProps {
   params: { id: string };
   searchParams: { [key: string]: string | undefined };
 }
 
-export interface BadgeCounts {
+export interface IBadgeCounts {
   GOLD: number;
   SILVER: number;
   BRONZE: number;
