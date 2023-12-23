@@ -46,7 +46,7 @@ const QuestionCard = ({ _id, title, tags, author, upvotes, views, answers, creat
           className="flex items-center gap-[9px]"
         >
           <Image
-            src="/assets/icons/account.svg"
+            src={author.picture}
             alt="author"
             width={20}
             height={20}

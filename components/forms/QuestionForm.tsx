@@ -86,7 +86,6 @@ const QuestionForm = ({
   };
 
   async function onSubmit(values: z.infer<typeof QuestionsSchema>) {
-    console.log({ values });
     setIsSubmitting(true);
     try {
       // make an async call to your API -> create a question
