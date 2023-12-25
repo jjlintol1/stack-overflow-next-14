@@ -2,9 +2,28 @@
 
 import User from "@/database/user.model";
 import { connectToDatabase } from "../mongoose"
-import { ICreateUserParams, IDeleteUserParams, IGetUserByIdParams, IUpdateUserParams } from "@/types/shared";
+import { ICreateUserParams, IDeleteUserParams, IGetAllUsersParams, IGetUserByIdParams, IUpdateUserParams } from "@/types/shared";
 import { revalidatePath } from "next/cache";
 import Question from "@/database/question.model";
+
+export async function getAllUsers(params: IGetAllUsersParams) {
+    try {
+        connectToDatabase();
+
+        // const { page = 1, pageSize = 20, filter, searchQuery } = params;
+
+        // Retrieve all users from database
+        const users = await User.find({})
+            .sort({ joinedAt: -1 });
+
+        return {
+            users
+        };
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 
 export async function getUserById(params: IGetUserByIdParams) {
     try {

@@ -8,20 +8,20 @@ import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
 
 export async function getQuestions(params: IGetQuestionsParams) {
-    try {
-        connectToDatabase();
-        
-        const questions = await Question.find()
-            .populate({ path: 'tags', model: Tag })
-            .populate({ path: 'author', model: User })
-            .sort({ createdAt: -1 });
-        return {
-            questions
-        };
-    } catch (error) {
-        console.log(error);
-        throw error;
-    }
+  try {
+    connectToDatabase();
+
+    const questions = await Question.find()
+      .populate({ path: "tags", model: Tag })
+      .populate({ path: "author", model: User })
+      .sort({ createdAt: -1 });
+    return {
+      questions,
+    };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 export async function createQuestion(params: ICreateQuestionParams) {
@@ -55,15 +55,19 @@ export async function createQuestion(params: ICreateQuestionParams) {
           },
         },
         {
-            upsert: true,
-            new: true
+          upsert: true,
+          new: true,
         }
       );
       tagDocuments.push(existingTag._id);
     }
 
     await Question.findByIdAndUpdate(question._id, {
-        $push: { tags: { $each: tagDocuments } }
+      $push: { tags: { $each: tagDocuments } },
+    });
+
+    await User.findByIdAndUpdate(question.author, {
+      $push: { posts: question._id },
     });
 
     // Create an interaction record for the user's ask_question action
