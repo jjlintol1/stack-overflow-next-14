@@ -1,8 +1,27 @@
 "use server"
 
-import { IGetTopInteractedTagsParams } from "@/types/shared";
+import { IGetAllTagsParams, IGetTopInteractedTagsParams } from "@/types/shared";
 import { connectToDatabase } from "../mongoose";
 import User from "@/database/user.model";
+import Tag from "@/database/tag.model";
+
+export async function getAllTags(params: IGetAllTagsParams) {
+    try {
+        connectToDatabase();
+
+        // const { page = 1, pageSize = 20, filter, searchQuery } = params;
+
+        const tags = await Tag.find({})
+            .sort({ createdAt: -1 });
+        
+        return {
+            tags
+        }
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 
 export async function getTopInteractedTags(params: IGetTopInteractedTagsParams) {
     try {
