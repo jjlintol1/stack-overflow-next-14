@@ -42,5 +42,19 @@ export function formatLargeNumber(num: number): string {
   }
 }
 
+export function formatDate(date: Date): string {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  };
+
+  const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+  return formattedDate;
+}
+
 
 

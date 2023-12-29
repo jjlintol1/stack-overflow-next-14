@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { SidebarLink } from "@/types";
 
 export const themes = [
@@ -77,3 +78,12 @@ export enum ICON_POSITION {
   RIGHT = "right"
 }
 
+export enum VOTES_COMPONENT_TYPES {
+  QUESTION = "question",
+  ANSWER = "answer"
+}
+
+export enum VOTE_ACTION_TYPES {
+  UPVOTE = "upvote",
+  DOWNVOTE = "downvote"
+}

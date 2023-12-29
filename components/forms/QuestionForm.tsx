@@ -32,9 +32,7 @@ interface IQuestionFormProps {
   mongoUserId: string;
 }
 
-const QuestionForm = ({
-  mongoUserId
-}: IQuestionFormProps) => {
+const QuestionForm = ({ mongoUserId }: IQuestionFormProps) => {
   const editorRef = useRef(null);
 
   const { mode } = useTheme();
@@ -96,13 +94,13 @@ const QuestionForm = ({
         content: values.explanation,
         tags: values.tags,
         author: JSON.parse(mongoUserId),
-        path: pathname
+        path: pathname,
       });
 
       // navigate to home page
       router.push("/");
     } catch (error) {
-      
+      console.log(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -180,9 +178,10 @@ const QuestionForm = ({
                       "undo redo | " +
                       "codesample | bold italic forecolor | alignleft aligncenter | " +
                       "alignright alignjustify | bullist numlist",
-                    content_style: "body { font-family:Inter; font-size:16px; }",
-                    skin: mode === 'dark' ? 'oxide-dark' : 'oxide',
-                    content_css: mode === 'dark' && 'dark'
+                    content_style:
+                      "body { font-family:Inter; font-size:16px; }",
+                    skin: mode === "dark" ? "oxide-dark" : "oxide",
+                    content_css: mode === "dark" ? "dark" : "light",
                   }}
                 />
               </FormControl>

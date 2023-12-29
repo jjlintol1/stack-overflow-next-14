@@ -25,7 +25,6 @@ const TagCard = ({
                 <p className="small-medium text-dark400_light500 mt-3.5">
                     <span className="body-semibold primary-text-gradient mr-2.5">{totalQuestions}+</span> Questions
                 </p>
-                
             </div>
         </article>
     </Link>
