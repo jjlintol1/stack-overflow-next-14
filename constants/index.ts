@@ -87,3 +87,4 @@ export enum VOTE_ACTION_TYPES {
   UPVOTE = "upvote",
   DOWNVOTE = "downvote"
 }
+

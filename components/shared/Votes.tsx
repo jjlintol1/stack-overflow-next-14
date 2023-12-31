@@ -2,6 +2,7 @@
 
 import { VOTES_COMPONENT_TYPES, VOTE_ACTION_TYPES } from "@/constants";
 import { downvoteAnswer, upvoteAnswer } from "@/lib/actions/answer.action";
+import { viewQuestion } from "@/lib/actions/interaction.action";
 import {
   downvoteQuestion,
   toggleSaveQuestion,
@@ -10,6 +11,7 @@ import {
 import { formatLargeNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 interface IVotesProps {
   type: string;
@@ -33,6 +35,15 @@ const Votes = ({
   hasSaved,
 }: IVotesProps) => {
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (type === VOTES_COMPONENT_TYPES.QUESTION) {
+      viewQuestion({
+        questionId: JSON.parse(itemId),
+        userId: userId ? JSON.parse(userId) : undefined,
+      });
+    }
+  }, [itemId, userId, type]);
 
   const handleVote = async (action: string) => {
     if (!userId) {
@@ -77,7 +88,6 @@ const Votes = ({
       }
       // TODO: show toast
     }
-    
   };
 
   return (
@@ -108,7 +118,9 @@ const Votes = ({
             onClick={() => handleVote(VOTE_ACTION_TYPES.DOWNVOTE)}
           />
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
-            <p className="subtle-medium text-dark400_light900">{formatLargeNumber(downvotes)}</p>
+            <p className="subtle-medium text-dark400_light900">
+              {formatLargeNumber(downvotes)}
+            </p>
           </div>
         </div>
       </div>
@@ -119,12 +131,14 @@ const Votes = ({
           width={18}
           height={18}
           className="cursor-pointer"
-          onClick={() => toggleSaveQuestion({
-            userId: JSON.parse(userId),
-            questionId: JSON.parse(itemId),
-            hasSaved,
-            path: pathname
-          })}
+          onClick={() =>
+            toggleSaveQuestion({
+              userId: JSON.parse(userId),
+              questionId: JSON.parse(itemId),
+              hasSaved,
+              path: pathname,
+            })
+          }
         />
       )}
     </div>
