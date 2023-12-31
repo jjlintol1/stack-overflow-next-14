@@ -1,9 +1,11 @@
 "use server"
 
-import { IGetAllTagsParams, IGetTopInteractedTagsParams } from "@/types/shared";
+import { IGetAllTagsParams, IGetQuestionsByTagIdParams, IGetTopInteractedTagsParams } from "@/types/shared";
 import { connectToDatabase } from "../mongoose";
 import User from "@/database/user.model";
 import Tag from "@/database/tag.model";
+import Question from "@/database/question.model";
+import { FilterQuery } from "mongoose";
 
 export async function getAllTags(params: IGetAllTagsParams) {
     try {
@@ -50,6 +52,53 @@ export async function getTopInteractedTags(params: IGetTopInteractedTagsParams) 
                 name: "mongoose"
             },
         ]
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export async function getQuestionsByTagId(params: IGetQuestionsByTagIdParams) {
+    try {
+        connectToDatabase();
+        const {
+            tagId,
+            // page,
+            // pageSize,
+            searchQuery
+        } = params;
+
+        const query: FilterQuery<typeof Question> = searchQuery
+      ? {
+          title: { $regex: new RegExp(searchQuery, "i") },
+        }
+      : {};
+
+        const tag = await Tag.findById(tagId)
+            .populate({ 
+                path: "questions", 
+                model: Question,
+                match: query,
+                options: {
+                    sort: { createdAt: -1 },
+                },
+                populate: [
+                    {
+                        path: "tags",
+                        model: Tag,
+                        select: "_id name"
+                    },
+                    {
+                        path: "author",
+                        model: User,
+                        select: "_id clerkId name picture"
+                    }
+                ]});
+
+        return {
+            tagName: tag.name,
+            questions: tag.questions
+        };
     } catch (error) {
         console.log(error);
         throw error;
