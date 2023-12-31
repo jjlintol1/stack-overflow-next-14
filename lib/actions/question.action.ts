@@ -3,7 +3,13 @@
 import Question from "@/database/question.model";
 import { connectToDatabase } from "../mongoose";
 import Tag from "@/database/tag.model";
-import { ICreateQuestionParams, IGetQuestionByIdParams, IGetQuestionsParams, IQuestionVoteParams, IToggleSaveQuestionParams } from "@/types/shared";
+import {
+  ICreateQuestionParams,
+  IGetQuestionByIdParams,
+  IGetQuestionsParams,
+  IQuestionVoteParams,
+  IToggleSaveQuestionParams,
+} from "@/types/shared";
 import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
 import Answer from "@/database/answer.model";
@@ -14,7 +20,11 @@ export async function getQuestionById(params: IGetQuestionByIdParams) {
     const { questionId } = params;
     const question = await Question.findById(questionId)
       .populate({ path: "tags", model: Tag, select: "_id name" })
-      .populate({ path: "author", model: User, select: "_id clerkId name picture" })
+      .populate({
+        path: "author",
+        model: User,
+        select: "_id clerkId name picture",
+      })
       .populate({ path: "answers", model: Answer });
     return question;
   } catch (error) {
@@ -101,54 +111,60 @@ export async function createQuestion(params: ICreateQuestionParams) {
 
 export async function upvoteQuestion(params: IQuestionVoteParams) {
   try {
-      connectToDatabase();
-      const { questionId, userId, hasUpvoted, hasDownvoted, path } = params;
-      if (hasUpvoted) { // Remove upvote if previously upvoted
-        await Question.findByIdAndUpdate(questionId, {
-          $pull: { upvotes: userId },
-        });
-      } else if (hasDownvoted) { // Remove downvote and add upvote
-        await Question.findByIdAndUpdate(questionId, {
-          $push: { upvotes: userId },
-          $pull: { downvotes: userId }
-        });
-      } else { // Add upvote if user has neither upvoted or downvoted
-        await Question.findByIdAndUpdate(questionId, {
-          $push: { upvotes: userId },
-        });
-      }
+    connectToDatabase();
+    const { questionId, userId, hasUpvoted, hasDownvoted, path } = params;
+    if (hasUpvoted) {
+      // Remove upvote if previously upvoted
+      await Question.findByIdAndUpdate(questionId, {
+        $pull: { upvotes: userId },
+      });
+    } else if (hasDownvoted) {
+      // Remove downvote and add upvote
+      await Question.findByIdAndUpdate(questionId, {
+        $push: { upvotes: userId },
+        $pull: { downvotes: userId },
+      });
+    } else {
+      // Add upvote if user has neither upvoted or downvoted
+      await Question.findByIdAndUpdate(questionId, {
+        $push: { upvotes: userId },
+      });
+    }
 
-      // TODO: Increment author's reputation
+    // TODO: Increment author's reputation
 
-      revalidatePath(path);
+    revalidatePath(path);
   } catch (error) {
-      console.log(error);
-      throw error;
+    console.log(error);
+    throw error;
   }
 }
 
 export async function downvoteQuestion(params: IQuestionVoteParams) {
   try {
-      connectToDatabase();
-      const { questionId, userId, hasUpvoted, hasDownvoted, path } = params;
-      if (hasDownvoted) { // Remove downvote if previously downvoted
-        await Question.findByIdAndUpdate(questionId, {
-          $pull: { downvotes: userId },
-        });
-      } else if (hasUpvoted) { // Remove upvote and replace with a downvote
-        await Question.findByIdAndUpdate(questionId, {
-          $push: { downvotes: userId },
-          $pull: { upvotes: userId }
-        });
-      } else { // Add downvote if user has neither upvoted or downvoted
-        await Question.findByIdAndUpdate(questionId, {
-          $push: { downvotes: userId },
-        });
-      }
-      revalidatePath(path);
+    connectToDatabase();
+    const { questionId, userId, hasUpvoted, hasDownvoted, path } = params;
+    if (hasDownvoted) {
+      // Remove downvote if previously downvoted
+      await Question.findByIdAndUpdate(questionId, {
+        $pull: { downvotes: userId },
+      });
+    } else if (hasUpvoted) {
+      // Remove upvote and replace with a downvote
+      await Question.findByIdAndUpdate(questionId, {
+        $push: { downvotes: userId },
+        $pull: { upvotes: userId },
+      });
+    } else {
+      // Add downvote if user has neither upvoted or downvoted
+      await Question.findByIdAndUpdate(questionId, {
+        $push: { downvotes: userId },
+      });
+    }
+    revalidatePath(path);
   } catch (error) {
-      console.log(error);
-      throw error;
+    console.log(error);
+    throw error;
   }
 }
 
@@ -158,11 +174,11 @@ export async function toggleSaveQuestion(params: IToggleSaveQuestionParams) {
     const { userId, questionId, hasSaved, path } = params;
     if (hasSaved) {
       await User.findByIdAndUpdate(userId, {
-        $pull: { saved: questionId }
+        $pull: { saved: questionId },
       });
     } else {
       await User.findByIdAndUpdate(userId, {
-        $push: { saved: questionId }
+        $push: { saved: questionId },
       });
     }
     revalidatePath(path);
