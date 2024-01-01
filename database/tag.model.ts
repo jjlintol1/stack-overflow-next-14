@@ -12,7 +12,6 @@ const tagSchema = new Schema<ITag>({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   description: {
     type: String,

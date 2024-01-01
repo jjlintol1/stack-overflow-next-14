@@ -69,7 +69,7 @@ export async function createQuestion(params: ICreateQuestionParams) {
       const existingTag = await Tag.findOneAndUpdate(
         {
           name: {
-            $regex: new RegExp(`^${tag}^$`, "i"),
+            $regex: new RegExp(`^${tag}$`, "i"),
           },
         },
         {

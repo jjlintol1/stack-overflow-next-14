@@ -7,7 +7,7 @@ import Interaction, { INTERACTION_TYPES } from "@/database/interaction.model";
 
 export async function viewQuestion(params: IViewQuestionParams) {
     try {
-        connectToDatabase();
+        await connectToDatabase();
         const { questionId, userId } = params;
 
         // Update view count for question

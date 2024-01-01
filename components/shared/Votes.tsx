@@ -10,7 +10,7 @@ import {
 } from "@/lib/actions/question.action";
 import { formatLargeNumber } from "@/lib/utils";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 interface IVotesProps {
@@ -36,14 +36,7 @@ const Votes = ({
 }: IVotesProps) => {
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (type === VOTES_COMPONENT_TYPES.QUESTION) {
-      viewQuestion({
-        questionId: JSON.parse(itemId),
-        userId: userId ? JSON.parse(userId) : undefined,
-      });
-    }
-  }, [itemId, userId, type]);
+  console.log(pathname);
 
   const handleVote = async (action: string) => {
     if (!userId) {
@@ -89,6 +82,18 @@ const Votes = ({
       // TODO: show toast
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (type === VOTES_COMPONENT_TYPES.QUESTION) {
+        console.log("useEffect in votes component");
+        viewQuestion({
+          questionId: JSON.parse(itemId),
+          userId: userId ? JSON.parse(userId) : undefined,
+        });
+      }
+    }
+  }, [itemId, userId, type]);
 
   return (
     <div className="flex items-center justify-end gap-5 max-sm:w-full">
