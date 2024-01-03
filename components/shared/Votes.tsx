@@ -10,7 +10,7 @@ import {
 } from "@/lib/actions/question.action";
 import { formatLargeNumber } from "@/lib/utils";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 interface IVotesProps {

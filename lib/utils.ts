@@ -56,5 +56,10 @@ export function formatDate(date: Date): string {
   return formattedDate;
 }
 
+export function formatMonthYear(date: Date): string {
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
+  const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+  return formattedDate;
+}
 
 

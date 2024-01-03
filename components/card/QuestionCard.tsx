@@ -26,15 +26,28 @@ interface IQuestionProps {
   clerkId?: string | null;
 }
 
-const QuestionCard = ({ _id, title, tags, author, upvotes, views, answers, createdAt, clerkId }: IQuestionProps) => {
+const QuestionCard = ({
+  _id,
+  title,
+  tags,
+  author,
+  upvotes,
+  views,
+  answers,
+  createdAt,
+  clerkId,
+}: IQuestionProps) => {
   return (
     <div className="card-wrapper rounded-[10px] p-9 sm:px-11">
-      <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
-      <Link href={`/question/${_id}`}>
-        <h3 className="base-semibold sm:h3-semibold text-dark200_light900 line-clamp-1 flex-1">
-          {title}
-        </h3>
-      </Link>
+      <div>
+        <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
+        <Link href={`/question/${_id}`}>
+          <h3 className="base-semibold sm:h3-semibold text-dark200_light900 line-clamp-1 flex-1">
+            {title}
+          </h3>
+        </Link>
+        {/* {If signed in add edit and delete actions} */}
+      </div>
       <div className="mt-[14px] flex flex-wrap gap-2">
         {tags.map((item) => (
           <RenderTag key={item._id} _id={item._id} name={item.name} />
@@ -64,17 +77,17 @@ const QuestionCard = ({ _id, title, tags, author, upvotes, views, answers, creat
           <Metric
             imgUrl="/assets/icons/like.svg"
             metric={upvotes.length}
-            metricTitle="votes"
+            metricTitle={upvotes.length === 1 ? "vote" : "votes"}
           />
           <Metric
             imgUrl="/assets/icons/message.svg"
             metric={answers.length}
-            metricTitle="answers"
+            metricTitle={answers.length === 1 ? "answer" : "answers"}
           />
           <Metric
             imgUrl="/assets/icons/eye.svg"
             metric={views}
-            metricTitle="views"
+            metricTitle={views === 1 ? "view" : "views"}
           />
         </div>
       </div>
