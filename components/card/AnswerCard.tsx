@@ -4,6 +4,9 @@ import { timeAgo } from "@/lib/utils";
 import Link from "next/link";
 import Metric from "../shared/Metric";
 import { Schema } from "mongoose";
+import { SignedIn } from "@clerk/nextjs";
+import EditDeleteAction from "../shared/EditDeleteAction";
+import { EDIT_DELETE_TYPES } from "@/constants";
 
 interface IAnswerCardProps {
   _id: Schema.Types.ObjectId;
@@ -18,19 +21,33 @@ interface IAnswerCardProps {
   question: {
     _id: string;
     title: string;
-  }
+  };
   clerkId?: string | null;
 }
 
-const AnswerCard = ({ _id, author, upvotes, question, createdAt }: IAnswerCardProps) => {
+const AnswerCard = ({
+  _id,
+  author,
+  upvotes,
+  question,
+  createdAt,
+  clerkId
+}: IAnswerCardProps) => {
   return (
     <div className="card-wrapper rounded-[10px] p-9 sm:px-11">
-      <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
-      <Link href={`/question/${question._id}`}>
-        <h3 className="base-semibold sm:h3-semibold text-dark200_light900 line-clamp-1 flex-1">
-          {question.title}
-        </h3>
-      </Link>
+      <div className="flex-between w-full">
+        <div>
+          <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
+          <Link href={`/question/${question._id}`}>
+            <h3 className="base-semibold sm:h3-semibold text-dark200_light900 line-clamp-1 flex-1">
+              {question.title}
+            </h3>
+          </Link>
+        </div>
+        <SignedIn>
+          {clerkId === author.clerkId && <EditDeleteAction type={EDIT_DELETE_TYPES.ANSWER} itemId={JSON.stringify(_id)} />}
+        </SignedIn>
+      </div>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-[9px]">
         <Link
           href={`profile/${author._id}`}

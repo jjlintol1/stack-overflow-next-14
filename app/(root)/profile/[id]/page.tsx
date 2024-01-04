@@ -11,8 +11,6 @@ import { SignedIn, auth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 
-import React from "react";
-
 const ProfilePage = async ({ params, searchParams }: IURLProps) => {
   const { userId: clerkId } = auth();
 
@@ -23,8 +21,6 @@ const ProfilePage = async ({ params, searchParams }: IURLProps) => {
   });
 
   const { user, totalQuestions, totalAnswers } = result;
-
-  console.log(user);
 
   return (
     <>

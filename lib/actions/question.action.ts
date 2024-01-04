@@ -5,6 +5,8 @@ import { connectToDatabase } from "../mongoose";
 import Tag from "@/database/tag.model";
 import {
   ICreateQuestionParams,
+  IDeleteQuestionParams,
+  IEditQuestionParams,
   IGetQuestionByIdParams,
   IGetQuestionsParams,
   IQuestionVoteParams,
@@ -13,6 +15,7 @@ import {
 import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
 import Answer from "@/database/answer.model";
+import Interaction from "@/database/interaction.model";
 
 export async function getQuestionById(params: IGetQuestionByIdParams) {
   try {
@@ -91,11 +94,6 @@ export async function createQuestion(params: ICreateQuestionParams) {
     // add tags to question
     await Question.findByIdAndUpdate(question._id, {
       $push: { tags: { $each: tagDocuments } },
-    });
-
-    // add question to user object
-    await User.findByIdAndUpdate(question.author, {
-      $push: { posts: question._id },
     });
 
     // Create an interaction record for the user's ask_question action
@@ -181,6 +179,83 @@ export async function toggleSaveQuestion(params: IToggleSaveQuestionParams) {
         $push: { saved: questionId },
       });
     }
+    revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function editQuestion(params: IEditQuestionParams) {
+  try {
+    connectToDatabase();
+    const { questionId, title, content, tags, path } = params;
+
+    const question = await Question.findByIdAndUpdate(questionId, {
+      title,
+      content
+    });
+
+    const tagDocuments = [];
+
+    for (const tag of tags) {
+      const existingTag = await Tag.findOne(
+        {
+          name: {
+            $regex: new RegExp(`^${tag}$`, "i"),
+          },
+        },
+      );
+
+      if (!existingTag) {
+        const newTag = await Tag.create({
+          name: tag,
+          questions: [question._id],
+          description: ""
+        });
+        tagDocuments.push(newTag._id);
+        continue;
+      } else if (existingTag && !existingTag.questions.includes(question._id)) {
+        existingTag.questions.push(question._id);
+        await existingTag.save();
+        tagDocuments.push(existingTag._id);
+        continue;
+      }
+      tagDocuments.push(existingTag._id);
+    }
+
+    await Question.findByIdAndUpdate(question._id, {
+      tags: tagDocuments
+    });
+
+    revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function deleteQuestion(params: IDeleteQuestionParams) {
+  try {
+    connectToDatabase();
+
+    const { questionId, path } = params;
+
+    await Question.findByIdAndDelete(questionId);
+
+    await Answer.deleteMany({
+      question: questionId
+    });
+    
+    await Interaction.deleteMany({
+      question: questionId
+    });
+
+    await Tag.updateMany(
+      { questions: questionId },
+      { $pull: { questions: questionId } }
+    );
+
     revalidatePath(path);
   } catch (error) {
     console.log(error);

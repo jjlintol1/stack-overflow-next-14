@@ -23,16 +23,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
 import { useTheme } from "@/context/ThemeProvider";
-import { createQuestion } from "@/lib/actions/question.action";
+import { createQuestion, editQuestion } from "@/lib/actions/question.action";
 import { usePathname, useRouter } from "next/navigation";
-
-const type: any = "create";
+import { QUESTION_FORM_TYPES } from "@/constants";
 
 interface IQuestionFormProps {
   mongoUserId: string;
+  type?: string;
+  questionDetails?: string;
 }
 
-const QuestionForm = ({ mongoUserId }: IQuestionFormProps) => {
+const QuestionForm = ({ mongoUserId, type, questionDetails }: IQuestionFormProps) => {
   const editorRef = useRef(null);
 
   const { mode } = useTheme();
@@ -42,12 +43,15 @@ const QuestionForm = ({ mongoUserId }: IQuestionFormProps) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  const parsedQuestionDetails = questionDetails && JSON.parse(questionDetails || "");
+  const groupedTags = parsedQuestionDetails?.tags.map((item: any) => item.name);
+
   const form = useForm<z.infer<typeof QuestionsSchema>>({
     resolver: zodResolver(QuestionsSchema),
     defaultValues: {
-      title: "",
-      explanation: "",
-      tags: [],
+      title: parsedQuestionDetails?.title || "",
+      explanation: parsedQuestionDetails?.content || "",
+      tags: groupedTags || [],
     },
   });
 
@@ -86,19 +90,31 @@ const QuestionForm = ({ mongoUserId }: IQuestionFormProps) => {
   async function onSubmit(values: z.infer<typeof QuestionsSchema>) {
     setIsSubmitting(true);
     try {
-      // make an async call to your API -> create a question
-      // contain all form data
+      if (type === QUESTION_FORM_TYPES.EDIT) {
+        await editQuestion({
+          questionId: parsedQuestionDetails?._id,
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          path: pathname
+        });
+        router.push(`/question/${parsedQuestionDetails?._id}`);
+      } else {
+        // make an async call to your API -> create a question
+        // contain all form data
+  
+        await createQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          author: JSON.parse(mongoUserId),
+          path: pathname,
+        });
+  
+        // navigate to home page
+        router.push("/");
+      }
 
-      await createQuestion({
-        title: values.title,
-        content: values.explanation,
-        tags: values.tags,
-        author: JSON.parse(mongoUserId),
-        path: pathname,
-      });
-
-      // navigate to home page
-      router.push("/");
     } catch (error) {
       console.log(error);
     } finally {
@@ -153,7 +169,7 @@ const QuestionForm = ({ mongoUserId }: IQuestionFormProps) => {
                   }}
                   onBlur={field.onBlur}
                   onEditorChange={(content) => field.onChange(content)}
-                  initialValue=""
+                  initialValue={parsedQuestionDetails?.content || ""}
                   init={{
                     height: 350,
                     menubar: false,
@@ -244,9 +260,9 @@ const QuestionForm = ({ mongoUserId }: IQuestionFormProps) => {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <>{type === "edit" ? "Editing..." : "Posting..."}</>
+            <>{type === QUESTION_FORM_TYPES.EDIT ? "Editing..." : "Posting..."}</>
           ) : (
-            <>{type === "edit" ? "Edit Question" : "Ask a Question"}</>
+            <>{type === QUESTION_FORM_TYPES.EDIT ? "Edit Question" : "Ask a Question"}</>
           )}
         </Button>
       </form>

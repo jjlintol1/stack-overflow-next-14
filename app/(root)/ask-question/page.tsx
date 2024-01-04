@@ -1,4 +1,5 @@
 import QuestionForm from '@/components/forms/QuestionForm'
+import { QUESTION_FORM_TYPES } from '@/constants';
 import { getUserById } from '@/lib/actions/user.action';
 import { auth } from '@clerk/nextjs'
 import { redirect } from 'next/navigation';
@@ -15,7 +16,7 @@ const AskQuestionPage = async () => {
     <div>
       <h1 className="h1-bold text-dark100_light900">Ask a Public Question</h1>
       <div className="mt-9">
-        <QuestionForm mongoUserId={JSON.stringify(mongoUser._id)} />
+        <QuestionForm mongoUserId={JSON.stringify(mongoUser._id)} type={QUESTION_FORM_TYPES.CREATE} />
       </div>
     </div>
   )

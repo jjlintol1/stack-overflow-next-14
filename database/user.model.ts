@@ -11,7 +11,6 @@ export interface IUser extends Document {
     location?: string;
     portfolioWebsite?: string;
     reputation?: number;
-    posts: Schema.Types.ObjectId[];
     saved: Schema.Types.ObjectId[];
     joinedAt: Date;
 }
@@ -47,10 +46,6 @@ const userSchema = new Schema<IUser>({
         type: Number,
         default: 0
     },
-    posts: [{
-        type: Schema.Types.ObjectId,
-        ref: "Question"
-    }],
     saved: [{
         type: Schema.Types.ObjectId,
         ref: "Question"

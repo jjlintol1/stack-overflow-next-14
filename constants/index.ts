@@ -88,3 +88,12 @@ export enum VOTE_ACTION_TYPES {
   DOWNVOTE = "downvote"
 }
 
+export enum QUESTION_FORM_TYPES {
+  CREATE = "create",
+  EDIT = "edit"
+}
+
+export enum EDIT_DELETE_TYPES {
+  QUESTION = "question",
+  ANSWER = "answer"
+}

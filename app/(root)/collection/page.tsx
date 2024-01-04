@@ -44,6 +44,7 @@ const CollectionPage = async () => {
               views={item.views}
               answers={item.answers}
               createdAt={item.createdAt}
+              clerkId={item.author.clerkId || null}
             />
           ))
         ) : (

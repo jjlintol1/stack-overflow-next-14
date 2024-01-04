@@ -5,6 +5,9 @@ import { timeAgo } from "@/lib/utils";
 import Link from "next/link";
 import Metric from "../shared/Metric";
 import { Schema } from "mongoose";
+import { SignedIn } from "@clerk/nextjs";
+import EditDeleteAction from "../shared/EditDeleteAction";
+import { EDIT_DELETE_TYPES } from "@/constants";
 
 interface IQuestionProps {
   _id: Schema.Types.ObjectId;
@@ -39,14 +42,19 @@ const QuestionCard = ({
 }: IQuestionProps) => {
   return (
     <div className="card-wrapper rounded-[10px] p-9 sm:px-11">
-      <div>
-        <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
-        <Link href={`/question/${_id}`}>
-          <h3 className="base-semibold sm:h3-semibold text-dark200_light900 line-clamp-1 flex-1">
-            {title}
-          </h3>
-        </Link>
+      <div className="flex-between w-full">
+        <div>
+          <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
+          <Link href={`/question/${_id}`}>
+            <h3 className="base-semibold sm:h3-semibold text-dark200_light900 line-clamp-1 flex-1">
+              {title}
+            </h3>
+          </Link>
+        </div>
         {/* {If signed in add edit and delete actions} */}
+        <SignedIn>
+          {clerkId === author.clerkId && <EditDeleteAction type={EDIT_DELETE_TYPES.QUESTION} itemId={JSON.stringify(_id)} />}
+        </SignedIn>
       </div>
       <div className="mt-[14px] flex flex-wrap gap-2">
         {tags.map((item) => (

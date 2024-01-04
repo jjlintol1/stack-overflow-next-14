@@ -1,11 +1,12 @@
 "use server"
 
-import { IAnswerVoteParams, ICreateAnswerParams, IGetAnswersParams } from "@/types/shared";
+import { IAnswerVoteParams, ICreateAnswerParams, IDeleteAnswerParams, IGetAnswersParams } from "@/types/shared";
 import { connectToDatabase } from "../mongoose";
 import Answer from "@/database/answer.model";
 import Question from "@/database/question.model";
 import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
+import Interaction from "@/database/interaction.model";
 
 export async function getAnswers(params: IGetAnswersParams) {
     try {
@@ -107,3 +108,26 @@ export async function upvoteAnswer(params: IAnswerVoteParams) {
         throw error;
     }
   }
+
+export async function deleteAnswer(params: IDeleteAnswerParams) {
+  try {
+    connectToDatabase();
+    const { answerId, path } = params;
+    const answer = await Answer.findOneAndDelete({
+      _id: answerId
+    });
+
+    await Question.findByIdAndUpdate(answer.question, {
+      $pull: { answers: answerId }
+    });
+
+    await Interaction.deleteMany({
+      answer: answerId
+    })
+    
+    revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}

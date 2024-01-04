@@ -87,6 +87,7 @@ export interface IEditQuestionParams {
   questionId: string;
   title: string;
   content: string;
+  tags: string[];
   path: string;
 }
 
