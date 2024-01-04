@@ -193,25 +193,23 @@ export async function editQuestion(params: IEditQuestionParams) {
 
     const question = await Question.findByIdAndUpdate(questionId, {
       title,
-      content
+      content,
     });
 
     const tagDocuments = [];
 
     for (const tag of tags) {
-      const existingTag = await Tag.findOne(
-        {
-          name: {
-            $regex: new RegExp(`^${tag}$`, "i"),
-          },
+      const existingTag = await Tag.findOne({
+        name: {
+          $regex: new RegExp(`^${tag}$`, "i"),
         },
-      );
+      });
 
       if (!existingTag) {
         const newTag = await Tag.create({
           name: tag,
           questions: [question._id],
-          description: ""
+          description: "",
         });
         tagDocuments.push(newTag._id);
         continue;
@@ -225,7 +223,7 @@ export async function editQuestion(params: IEditQuestionParams) {
     }
 
     await Question.findByIdAndUpdate(question._id, {
-      tags: tagDocuments
+      tags: tagDocuments,
     });
 
     revalidatePath(path);
@@ -244,11 +242,11 @@ export async function deleteQuestion(params: IDeleteQuestionParams) {
     await Question.findByIdAndDelete(questionId);
 
     await Answer.deleteMany({
-      question: questionId
+      question: questionId,
     });
-    
+
     await Interaction.deleteMany({
-      question: questionId
+      question: questionId,
     });
 
     await Tag.updateMany(
@@ -257,6 +255,19 @@ export async function deleteQuestion(params: IDeleteQuestionParams) {
     );
 
     revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function getHotQuestions() {
+  try {
+    const questions = await Question.find()
+      .sort({ views: -1, upvotes: -1 }) // descending order
+      .limit(5);
+
+    return questions;
   } catch (error) {
     console.log(error);
     throw error;
