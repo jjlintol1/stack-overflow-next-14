@@ -10,7 +10,8 @@ import React from "react";
 
 const TagsPage = async ({ searchParams }: ISearchParamsProps) => {
   const result = await getAllTags({
-    searchQuery: searchParams.q
+    searchQuery: searchParams?.q,
+    filter: searchParams?.filter
   });
 
   return (

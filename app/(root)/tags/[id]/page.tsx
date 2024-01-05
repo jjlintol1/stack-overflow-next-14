@@ -4,6 +4,7 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import { ICON_POSITION } from "@/constants";
 import { getQuestionsByTagId } from "@/lib/actions/tag.actions";
 import { IURLProps } from "@/types";
+import { auth } from "@clerk/nextjs";
 import React from "react";
 
 
@@ -12,6 +13,8 @@ const TagDetailsPage = async ({
   params,
   searchParams,
 }: IURLProps) => {
+  const { userId } = auth();
+
   const tagId = params.id;
 
   const result = await getQuestionsByTagId({
@@ -46,7 +49,7 @@ const TagDetailsPage = async ({
               views={item.views}
               answers={item.answers}
               createdAt={item.createdAt}
-              clerkId={item.author.clerkId || null}
+              clerkId={userId || null}
             />
           ))
         ) : (

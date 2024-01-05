@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export const AnswerFilters = [
   { name: "Highest Upvotes", value: "highestUpvotes" },
   { name: "Lowest Upvotes", value: "lowestUpvotes" },
@@ -39,3 +40,46 @@ export const GlobalSearchFilters = [
   { name: "User", value: "user" },
   { name: "Tag", value: "tag" },
 ];
+
+export enum ANSWER_FILTER_VALUES {
+  HIGHEST_UPVOTES = "highestUpvotes",
+  LOWEST_UPVOTES = "lowestUpvotes",
+  MOST_RECENT = "recent",
+  OLDEST = "old",
+}
+
+export enum USER_FILTER_VALUES {
+  NEW_USERS = "new_users",
+  OLD_USERS = "old_users",
+  TOP_CONTRIBUTORS = "top_contributors",
+}
+
+export enum QUESTION_FILTER_VALUES {
+  MOST_RECENT = "most_recent",
+  OLDEST = "oldest",
+  MOST_VOTED = "most_voted",
+  MOST_VIEWED = "most_viewed",
+  MOST_ANSWERED = "most_answered",
+}
+
+export enum TAG_FILTER_VALUES {
+  POPULAR = "popular",
+  RECENT = "recent",
+  NAME = "name",
+  OLD = "old",
+}
+
+export enum HOME_PAGE_FILTER_VALUES {
+  NEWEST = "newest",
+  RECOMMENDED = "recommended",
+  FREQUENT = "frequent",
+  UNANSWERED = "unanswered",
+}
+
+export enum GLOBAL_SEARCH_FILTER_VALUES {
+  QUESTION = "question",
+  ANSWER = "answer",
+  USER = "user",
+  TAG = "tag",
+}
+

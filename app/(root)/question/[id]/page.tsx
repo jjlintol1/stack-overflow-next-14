@@ -9,6 +9,7 @@ import { VOTES_COMPONENT_TYPES } from "@/constants";
 import { getQuestionById } from "@/lib/actions/question.action";
 import { getUserById } from "@/lib/actions/user.action";
 import { timeAgo } from "@/lib/utils";
+import { IURLProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 
 import Image from "next/image";
@@ -16,13 +17,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
-interface IQuestionPageProps {
-  params: {
-    id: string;
-  };
-}
-
-const QuestionDetailsPage = async ({ params }: IQuestionPageProps) => {
+const QuestionDetailsPage = async ({ params, searchParams }: IURLProps) => {
   const { userId } = auth();
 
   if (!userId) redirect("/sign-in");
@@ -95,6 +90,8 @@ const QuestionDetailsPage = async ({ params }: IQuestionPageProps) => {
         questionId={question._id}
         userId={mongoUser._id}
         totalAnswers={question.answers.length}
+        page={searchParams?.page}
+        filter={searchParams?.filter}
       />
       <AnswerForm
         mongoUserId={JSON.stringify(mongoUser._id)}

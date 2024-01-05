@@ -16,7 +16,8 @@ const CollectionPage = async ({ searchParams }: ISearchParamsProps) => {
 
   const result = await getSavedQuestions({ 
     clerkId: userId,
-    searchQuery: searchParams?.q
+    searchQuery: searchParams?.q,
+    filter: searchParams?.filter
   });
 
   return (
@@ -48,7 +49,7 @@ const CollectionPage = async ({ searchParams }: ISearchParamsProps) => {
               views={item.views}
               answers={item.answers}
               createdAt={item.createdAt}
-              clerkId={item.author.clerkId || null}
+              clerkId={userId || null}
             />
           ))
         ) : (

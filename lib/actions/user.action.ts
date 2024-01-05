@@ -16,6 +16,7 @@ import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
 import { FilterQuery } from "mongoose";
 import Answer from "@/database/answer.model";
+import { QUESTION_FILTER_VALUES, USER_FILTER_VALUES } from "@/constants/filters";
 
 export async function getAllUsers(params: IGetAllUsersParams) {
   try {
@@ -24,7 +25,7 @@ export async function getAllUsers(params: IGetAllUsersParams) {
     const {
       // page = 1,
       // pageSize = 20,
-      // filter,
+      filter,
       searchQuery,
     } = params;
 
@@ -41,8 +42,24 @@ export async function getAllUsers(params: IGetAllUsersParams) {
       ];
     }
 
+    const sort: any = {};
+
+    switch (filter) {
+      case USER_FILTER_VALUES.NEW_USERS:
+        sort.joinedAt = -1;
+        break;
+      case USER_FILTER_VALUES.OLD_USERS:
+        sort.joinedAt = 1;
+        break;
+      case USER_FILTER_VALUES.TOP_CONTRIBUTORS:
+        sort.reputation = -1;
+        break;
+      default:
+        break;
+    }
+
     // Retrieve all users from database
-    const users = await User.find(query).sort({ joinedAt: -1 });
+    const users = await User.find(query).sort(sort);
 
     return {
       users,
@@ -135,7 +152,7 @@ export async function getSavedQuestions(params: IGetSavedQuestionsParams) {
       clerkId,
       // page,
       // pageSize,
-      // filter,
+      filter,
       searchQuery,
     } = params;
 
@@ -152,12 +169,34 @@ export async function getSavedQuestions(params: IGetSavedQuestionsParams) {
       ];
     }
 
+    const sort: any = {};
+
+    switch (filter) {
+      case QUESTION_FILTER_VALUES.MOST_RECENT:
+        sort.createdAt = -1;
+        break;
+      case QUESTION_FILTER_VALUES.OLDEST:
+        sort.createdAt = 1;
+        break;
+      case QUESTION_FILTER_VALUES.MOST_ANSWERED:
+        sort.answers = -1;
+        break;
+      case QUESTION_FILTER_VALUES.MOST_VIEWED:
+        sort.views = -1;
+        break;
+      case QUESTION_FILTER_VALUES.MOST_VOTED:
+        sort.upvotes = -1;
+        break;
+      default:
+        break;
+    }
+
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
       model: Question,
       match: query,
       options: {
-        sort: { createdAt: -1 },
+        sort,
       },
       populate: [
         {

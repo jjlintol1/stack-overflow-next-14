@@ -10,6 +10,7 @@ import User from "@/database/user.model";
 import Tag from "@/database/tag.model";
 import Question from "@/database/question.model";
 import { FilterQuery } from "mongoose";
+import { TAG_FILTER_VALUES } from "@/constants/filters";
 
 export async function getAllTags(params: IGetAllTagsParams) {
   try {
@@ -18,7 +19,7 @@ export async function getAllTags(params: IGetAllTagsParams) {
     const {
       // page = 1,
       // pageSize = 20,
-      // filter,
+      filter,
       searchQuery,
     } = params;
 
@@ -28,7 +29,26 @@ export async function getAllTags(params: IGetAllTagsParams) {
         }
       : {};
 
-    const tags = await Tag.find(nameQuery).sort({ createdAt: -1 });
+    const sort: any = {};
+
+    switch (filter) {
+      case TAG_FILTER_VALUES.NAME:
+        sort.name = 1;
+        break;
+      case TAG_FILTER_VALUES.POPULAR:
+        sort.questions = -1;
+        break;
+      case TAG_FILTER_VALUES.OLD:
+        sort.createdAt = 1;
+        break;
+      case TAG_FILTER_VALUES.RECENT:
+        sort.createdAt = -1;
+        break;
+      default:
+        break;
+    }
+
+    const tags = await Tag.find(nameQuery).sort(sort);
 
     return {
       tags,

@@ -8,12 +8,18 @@ import { ICON_POSITION } from "@/constants";
 import { HomePageFilters } from "@/constants/filters";
 import { getQuestions } from "@/lib/actions/question.action";
 import { ISearchParamsProps } from "@/types";
+import { auth } from "@clerk/nextjs";
 import Link from "next/link";
 
 export default async function Home({ searchParams }: ISearchParamsProps) {
+  const { userId } = auth();
+  
   const result = await getQuestions({
-    searchQuery: searchParams?.q
+    searchQuery: searchParams?.q,
+    filter: searchParams?.filter
   });
+
+  // TODO: Fetch recommended
 
   return (
     <>
@@ -53,7 +59,7 @@ export default async function Home({ searchParams }: ISearchParamsProps) {
               views={item.views}
               answers={item.answers}
               createdAt={item.createdAt}
-              clerkId={item.author.clerkId || null}
+              clerkId={userId || null}
             />
           ))
         ) : (

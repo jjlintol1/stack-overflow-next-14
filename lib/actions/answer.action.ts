@@ -7,21 +7,41 @@ import Question from "@/database/question.model";
 import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
 import Interaction from "@/database/interaction.model";
+import { ANSWER_FILTER_VALUES } from "@/constants/filters";
 
 export async function getAnswers(params: IGetAnswersParams) {
     try {
         connectToDatabase();
 
         const {
-            questionId
-            // sortBy,
+            questionId,
+            sortBy,
             // page,
             // pageSize
         } = params;
 
+        const sort: any = {};
+
+        switch (sortBy) {
+          case ANSWER_FILTER_VALUES.HIGHEST_UPVOTES:
+            sort.upvotes = -1;
+            break;
+          case ANSWER_FILTER_VALUES.LOWEST_UPVOTES:
+            sort.upvotes = 1;
+            break;
+          case ANSWER_FILTER_VALUES.MOST_RECENT:
+            sort.createdAt = -1;
+            break;
+          case ANSWER_FILTER_VALUES.OLDEST:
+            sort.createdAt = 1;
+            break;
+          default:
+            break;
+        }
+
         const answers = await Answer.find({ question: questionId })
             .populate({ path: "author", model: User, select: "_id clerkId name picture" })
-            .sort({ createdAt: -1 });
+            .sort(sort);
         
         return {
             answers

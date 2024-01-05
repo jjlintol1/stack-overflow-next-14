@@ -17,6 +17,7 @@ import User from "@/database/user.model";
 import Answer from "@/database/answer.model";
 import Interaction from "@/database/interaction.model";
 import { FilterQuery } from "mongoose";
+import { HOME_PAGE_FILTER_VALUES } from "@/constants/filters";
 
 export async function getQuestionById(params: IGetQuestionByIdParams) {
   try {
@@ -41,7 +42,7 @@ export async function getQuestions(params: IGetQuestionsParams) {
   try {
     connectToDatabase();
 
-    const { searchQuery } = params;
+    const { searchQuery, filter } = params;
 
     const query: FilterQuery<typeof Question> = {};
 
@@ -56,10 +57,30 @@ export async function getQuestions(params: IGetQuestionsParams) {
       ]
     }
 
+    const sort: any = {};
+
+    switch (filter) {
+      case HOME_PAGE_FILTER_VALUES.NEWEST:
+        sort.createdAt = -1;
+        break;
+      case HOME_PAGE_FILTER_VALUES.FREQUENT:
+        sort.views = -1;
+        break;
+      case HOME_PAGE_FILTER_VALUES.UNANSWERED:
+        query.answers = {
+          $exists: true,
+          $eq: []
+        };
+        break;
+      default:
+        break;
+    }
+    
+
     const questions = await Question.find(query)
       .populate({ path: "tags", model: Tag })
       .populate({ path: "author", model: User })
-      .sort({ createdAt: -1 });
+      .sort(sort);
     return {
       questions,
     };
