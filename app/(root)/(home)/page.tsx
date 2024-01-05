@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { ICON_POSITION } from "@/constants";
 import { HomePageFilters } from "@/constants/filters";
 import { getQuestions } from "@/lib/actions/question.action";
+import { ISearchParamsProps } from "@/types";
 import Link from "next/link";
 
-export default async function Home() {
-  const result = await getQuestions({});
+export default async function Home({ searchParams }: ISearchParamsProps) {
+  const result = await getQuestions({
+    searchQuery: searchParams?.q
+  });
 
   return (
     <>

@@ -4,10 +4,13 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import { ICON_POSITION } from "@/constants";
 import { UserFilters } from "@/constants/filters";
 import { getAllUsers } from "@/lib/actions/user.action";
+import { ISearchParamsProps } from "@/types";
 import Link from "next/link";
 
-const CommunityPage = async () => {
-  const result = await getAllUsers({});
+const CommunityPage = async ({ searchParams }: ISearchParamsProps) => {
+  const result = await getAllUsers({
+    searchQuery: searchParams?.q
+  });
 
   return (
     <>

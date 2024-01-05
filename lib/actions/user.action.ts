@@ -21,10 +21,28 @@ export async function getAllUsers(params: IGetAllUsersParams) {
   try {
     connectToDatabase();
 
-    // const { page = 1, pageSize = 20, filter, searchQuery } = params;
+    const {
+      // page = 1,
+      // pageSize = 20,
+      // filter,
+      searchQuery,
+    } = params;
+
+    const query: FilterQuery<typeof User> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        {
+          name: { $regex: new RegExp(searchQuery, "i") },
+        },
+        {
+          username: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
 
     // Retrieve all users from database
-    const users = await User.find({}).sort({ joinedAt: -1 });
+    const users = await User.find(query).sort({ joinedAt: -1 });
 
     return {
       users,
@@ -121,11 +139,18 @@ export async function getSavedQuestions(params: IGetSavedQuestionsParams) {
       searchQuery,
     } = params;
 
-    const query: FilterQuery<typeof Question> = searchQuery
-      ? {
+    const query: FilterQuery<typeof Question> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        {
           title: { $regex: new RegExp(searchQuery, "i") },
-        }
-      : {};
+        },
+        {
+          content: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
 
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
@@ -172,7 +197,7 @@ export async function getUserInfo(params: IGetUserByIdParams) {
     const user = await User.findOne({ clerkId: userId });
 
     if (!user) {
-      throw new Error("User nor found")
+      throw new Error("User nor found");
     }
 
     const totalQuestions = await Question.countDocuments({ author: user._id });
@@ -181,8 +206,8 @@ export async function getUserInfo(params: IGetUserByIdParams) {
     return {
       user,
       totalQuestions,
-      totalAnswers
-    }
+      totalAnswers,
+    };
   } catch (error) {
     console.log(error);
     throw error;
@@ -192,16 +217,12 @@ export async function getUserInfo(params: IGetUserByIdParams) {
 export async function getUserQuestions(params: IGetUserStatsParams) {
   try {
     connectToDatabase();
-    const {
-      userId,
-      page = 1,
-      pageSize = 10
-    } = params;
+    const { userId, page = 1, pageSize = 10 } = params;
 
     const skipAmount = (page - 1) * pageSize;
 
     const totalQuestions = await Question.countDocuments({
-      author: userId
+      author: userId,
     });
 
     const questions = await Question.find({ author: userId })
@@ -209,14 +230,18 @@ export async function getUserQuestions(params: IGetUserStatsParams) {
       .skip(skipAmount)
       .limit(pageSize)
       .populate({ path: "tags", model: Tag, select: "_id name" })
-      .populate({ path: "author", model: User, select: "_id clerkId name picture" });
+      .populate({
+        path: "author",
+        model: User,
+        select: "_id clerkId name picture",
+      });
 
-    const isNextQuestions = totalQuestions > skipAmount + questions.length
-    
+    const isNextQuestions = totalQuestions > skipAmount + questions.length;
+
     return {
       totalQuestions,
       questions,
-      isNextQuestions
+      isNextQuestions,
     };
   } catch (error) {
     console.log(error);
@@ -227,16 +252,12 @@ export async function getUserQuestions(params: IGetUserStatsParams) {
 export async function getUserAnswers(params: IGetUserStatsParams) {
   try {
     connectToDatabase();
-    const {
-      userId,
-      page = 1,
-      pageSize = 10
-    } = params;
+    const { userId, page = 1, pageSize = 10 } = params;
 
     const skipAmount = (page - 1) * pageSize;
 
     const totalAnswers = await Answer.countDocuments({
-      author: userId
+      author: userId,
     });
 
     const answers = await Answer.find({ author: userId })
@@ -244,14 +265,18 @@ export async function getUserAnswers(params: IGetUserStatsParams) {
       .limit(pageSize)
       .skip(skipAmount)
       .populate({ path: "question", model: Question, select: "_id title" })
-      .populate({ path: "author", model: User, select: "_id clerkId name picture" });
+      .populate({
+        path: "author",
+        model: User,
+        select: "_id clerkId name picture",
+      });
 
     const isNextAnswers = totalAnswers > skipAmount + answers.length;
-    
+
     return {
       totalAnswers,
       answers,
-      isNextAnswers
+      isNextAnswers,
     };
   } catch (error) {
     console.log(error);

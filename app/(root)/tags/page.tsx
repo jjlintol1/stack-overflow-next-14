@@ -5,10 +5,13 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import { ICON_POSITION } from "@/constants";
 import { TagFilters } from "@/constants/filters";
 import { getAllTags } from "@/lib/actions/tag.actions";
+import { ISearchParamsProps } from "@/types";
 import React from "react";
 
-const TagsPage = async () => {
-  const result = await getAllTags({});
+const TagsPage = async ({ searchParams }: ISearchParamsProps) => {
+  const result = await getAllTags({
+    searchQuery: searchParams.q
+  });
 
   return (
     <>

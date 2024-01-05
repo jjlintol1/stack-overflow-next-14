@@ -42,7 +42,7 @@ const QuestionCard = ({
 }: IQuestionProps) => {
   return (
     <div className="card-wrapper rounded-[10px] p-9 sm:px-11">
-      <div className="flex-between w-full">
+      <div className="flex w-full items-center justify-between gap-5">
         <div>
           <p className="small-regular sm:hidden">{timeAgo(createdAt)}</p>
           <Link href={`/question/${_id}`}>

@@ -5,22 +5,26 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import { ICON_POSITION } from "@/constants";
 import { QuestionFilters } from "@/constants/filters";
 import { getSavedQuestions } from "@/lib/actions/user.action";
+import { ISearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
-const CollectionPage = async () => {
+const CollectionPage = async ({ searchParams }: ISearchParamsProps) => {
   const { userId } = auth();
 
   if (!userId) redirect("/sign-in");
 
-  const result = await getSavedQuestions({ clerkId: userId });
+  const result = await getSavedQuestions({ 
+    clerkId: userId,
+    searchQuery: searchParams?.q
+  });
 
   return (
     <>
       <h1 className="h1-bold text-dark100_light900">Saved Questions</h1>
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
         <LocalSearch
-          route="/collections"
+          route="/collection"
           iconPosition={ICON_POSITION.LEFT}
           imgSrc="/assets/icons/search.svg"
           placeholder="Search for questions"
