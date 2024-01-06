@@ -8,6 +8,7 @@ import { getAnswers } from "@/lib/actions/answer.action";
 import { AnswerFilters } from "@/constants/filters";
 import Image from "next/image";
 import { VOTES_COMPONENT_TYPES } from "@/constants";
+import Pagination from "./Pagination";
 
 interface IAllAnswersProps {
   questionId: string;
@@ -28,6 +29,7 @@ const AllAnswers = async ({
     questionId, 
     sortBy: filter,
     page: page ? +page : 1,
+    pageSize: 10
   });
 
   const answers = result.answers;
@@ -83,6 +85,7 @@ const AllAnswers = async ({
           </article>
         ))}
       </div>
+      <Pagination pageNumber={page ? +page : 1} isNext={result.isNextAnswers} />
     </div>
   );
 };

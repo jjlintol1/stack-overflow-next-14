@@ -2,6 +2,7 @@ import QuestionCard from "@/components/card/QuestionCard";
 import HomeFilters from "@/components/home/HomeFilters";
 import Filters from "@/components/shared/Filters";
 import NoResult from "@/components/shared/NoResult";
+import Pagination from "@/components/shared/Pagination";
 import LocalSearch from "@/components/shared/search/LocalSearch";
 import { Button } from "@/components/ui/button";
 import { ICON_POSITION } from "@/constants";
@@ -13,10 +14,14 @@ import Link from "next/link";
 
 export default async function Home({ searchParams }: ISearchParamsProps) {
   const { userId } = auth();
+
+  const page = searchParams?.page || "1";
   
   const result = await getQuestions({
     searchQuery: searchParams?.q,
-    filter: searchParams?.filter
+    filter: searchParams?.filter,
+    page: +page,
+    pageSize: 20
   });
 
   // TODO: Fetch recommended
@@ -73,6 +78,7 @@ export default async function Home({ searchParams }: ISearchParamsProps) {
           />
         )}
       </div>
+      <Pagination pageNumber={+page} isNext={result.isNextQuestions} />
     </>
   );
 }

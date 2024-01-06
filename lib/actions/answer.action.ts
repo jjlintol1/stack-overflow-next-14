@@ -16,9 +16,11 @@ export async function getAnswers(params: IGetAnswersParams) {
         const {
             questionId,
             sortBy,
-            // page,
-            // pageSize
+            page = 1,
+            pageSize = 10
         } = params;
+
+        const skipAmount = (page - 1) * pageSize;
 
         const sort: any = {};
 
@@ -39,12 +41,19 @@ export async function getAnswers(params: IGetAnswersParams) {
             break;
         }
 
+        const totalAnswers = await Answer.countDocuments({ question: questionId });
+
         const answers = await Answer.find({ question: questionId })
             .populate({ path: "author", model: User, select: "_id clerkId name picture" })
+            .skip(skipAmount)
+            .limit(pageSize)
             .sort(sort);
+
+        const isNextAnswers = totalAnswers > skipAmount + answers.length;
         
         return {
-            answers
+            answers,
+            isNextAnswers
         }
     } catch (error) {
         console.log(error);

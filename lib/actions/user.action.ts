@@ -23,11 +23,13 @@ export async function getAllUsers(params: IGetAllUsersParams) {
     connectToDatabase();
 
     const {
-      // page = 1,
-      // pageSize = 20,
+      page = 1,
+      pageSize = 20,
       filter,
       searchQuery,
     } = params;
+
+    const skipAmount = (page - 1) * pageSize;
 
     const query: FilterQuery<typeof User> = {};
 
@@ -58,11 +60,19 @@ export async function getAllUsers(params: IGetAllUsersParams) {
         break;
     }
 
+    const totalUsers = await User.countDocuments(query);
+
     // Retrieve all users from database
-    const users = await User.find(query).sort(sort);
+    const users = await User.find(query)
+      .sort(sort)
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    const isNextUsers = totalUsers > skipAmount + users.length;
 
     return {
       users,
+      isNextUsers
     };
   } catch (error) {
     console.log(error);
@@ -150,11 +160,13 @@ export async function getSavedQuestions(params: IGetSavedQuestionsParams) {
     connectToDatabase();
     const {
       clerkId,
-      // page,
-      // pageSize,
+      page = 1,
+      pageSize = 20,
       filter,
       searchQuery,
     } = params;
+
+    const skipAmount = (page - 1) * pageSize;
 
     const query: FilterQuery<typeof Question> = {};
 
@@ -191,12 +203,26 @@ export async function getSavedQuestions(params: IGetSavedQuestionsParams) {
         break;
     }
 
+    const result = await User.findOne({
+      clerkId,
+    }).populate({
+      path: "saved",
+      model: Question,
+      match: query
+    });
+
+    const totalQuestions = result.saved.length;
+
+    console.log(totalQuestions);
+
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
       model: Question,
       match: query,
       options: {
         sort,
+        limit: pageSize,
+        skip: skipAmount
       },
       populate: [
         {
@@ -216,8 +242,11 @@ export async function getSavedQuestions(params: IGetSavedQuestionsParams) {
       throw new Error("User not found");
     }
 
+    const isNextQuestions = totalQuestions > skipAmount + user.saved.length;
+
     return {
       questions: user.saved,
+      isNextQuestions
     };
   } catch (error) {
     console.log(error);
@@ -278,7 +307,6 @@ export async function getUserQuestions(params: IGetUserStatsParams) {
     const isNextQuestions = totalQuestions > skipAmount + questions.length;
 
     return {
-      totalQuestions,
       questions,
       isNextQuestions,
     };
@@ -313,7 +341,6 @@ export async function getUserAnswers(params: IGetUserStatsParams) {
     const isNextAnswers = totalAnswers > skipAmount + answers.length;
 
     return {
-      totalAnswers,
       answers,
       isNextAnswers,
     };

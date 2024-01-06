@@ -1,6 +1,7 @@
 import QuestionCard from "@/components/card/QuestionCard";
 import Filters from "@/components/shared/Filters";
 import NoResult from "@/components/shared/NoResult";
+import Pagination from "@/components/shared/Pagination";
 import LocalSearch from "@/components/shared/search/LocalSearch";
 import { ICON_POSITION } from "@/constants";
 import { QuestionFilters } from "@/constants/filters";
@@ -14,10 +15,14 @@ const CollectionPage = async ({ searchParams }: ISearchParamsProps) => {
 
   if (!userId) redirect("/sign-in");
 
+  const page = searchParams?.page || "1";
+
   const result = await getSavedQuestions({ 
     clerkId: userId,
     searchQuery: searchParams?.q,
-    filter: searchParams?.filter
+    filter: searchParams?.filter,
+    page: +page,
+    pageSize: 20
   });
 
   return (
@@ -61,6 +66,7 @@ const CollectionPage = async ({ searchParams }: ISearchParamsProps) => {
           />
         )}
       </div>
+      <Pagination pageNumber={+page} isNext={result.isNextQuestions} />
     </>
   );
 };
