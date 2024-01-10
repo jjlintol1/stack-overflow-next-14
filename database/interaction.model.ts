@@ -2,7 +2,9 @@ import { Schema, model, models, Document } from "mongoose";
 
 /* eslint-disable */
 export enum INTERACTION_TYPES {
-  VIEW = "view"
+  VIEW = "view",
+  ASK_QUESTION = "ask_question",
+  ANSWER = "answer",
 }
 /* eslint-enable */
 

@@ -15,9 +15,10 @@ import {
 import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
 import Answer from "@/database/answer.model";
-import Interaction from "@/database/interaction.model";
+import Interaction, { INTERACTION_TYPES } from "@/database/interaction.model";
 import { FilterQuery } from "mongoose";
 import { HOME_PAGE_FILTER_VALUES } from "@/constants/filters";
+
 
 export async function getQuestionById(params: IGetQuestionByIdParams) {
   try {
@@ -144,13 +145,22 @@ export async function createQuestion(params: ICreateQuestionParams) {
     });
 
     // Create an interaction record for the user's ask_question action
-
+    await Interaction.create({
+      user: author,
+      action: INTERACTION_TYPES.ASK_QUESTION,
+      question: question._id,
+      tag: tagDocuments
+    });
     // Increment author's reputation by 5 points for asking a question
+    await User.findByIdAndUpdate(author, {
+      $inc: { reputation: 5 }
+    });
 
     // revalidatePath allows you to purge cached data for a specific path
     revalidatePath(path);
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
 
@@ -158,25 +168,43 @@ export async function upvoteQuestion(params: IQuestionVoteParams) {
   try {
     connectToDatabase();
     const { questionId, userId, hasUpvoted, hasDownvoted, path } = params;
+    let question;
+    let userIncrementAmount;
+    let authorIncrementAmount;
     if (hasUpvoted) {
       // Remove upvote if previously upvoted
-      await Question.findByIdAndUpdate(questionId, {
+      question = await Question.findByIdAndUpdate(questionId, {
         $pull: { upvotes: userId },
       });
+      userIncrementAmount = -1;
+      authorIncrementAmount = -10;
     } else if (hasDownvoted) {
       // Remove downvote and add upvote
-      await Question.findByIdAndUpdate(questionId, {
+      question = await Question.findByIdAndUpdate(questionId, {
         $push: { upvotes: userId },
         $pull: { downvotes: userId },
       });
+      userIncrementAmount = 2;
+      authorIncrementAmount = 20;
     } else {
       // Add upvote if user has neither upvoted or downvoted
-      await Question.findByIdAndUpdate(questionId, {
+      question = await Question.findByIdAndUpdate(questionId, {
         $push: { upvotes: userId },
+      });
+      userIncrementAmount = 1;
+      authorIncrementAmount = 10;
+    }
+
+    if (userId !== question.author) {
+      await User.findByIdAndUpdate(userId, {
+        $inc: { reputation: userIncrementAmount }
+      });
+  
+      await User.findByIdAndUpdate(question.author, {
+        $inc: { reputation: authorIncrementAmount }
       });
     }
 
-    // TODO: Increment author's reputation
 
     revalidatePath(path);
   } catch (error) {
@@ -189,23 +217,46 @@ export async function downvoteQuestion(params: IQuestionVoteParams) {
   try {
     connectToDatabase();
     const { questionId, userId, hasUpvoted, hasDownvoted, path } = params;
+
+    let question;
+    let userIncrementAmount;
+    let authorIncrementAmount;
+
     if (hasDownvoted) {
       // Remove downvote if previously downvoted
-      await Question.findByIdAndUpdate(questionId, {
+      question = await Question.findByIdAndUpdate(questionId, {
         $pull: { downvotes: userId },
       });
+      userIncrementAmount = 1;
+      authorIncrementAmount = 10;
     } else if (hasUpvoted) {
       // Remove upvote and replace with a downvote
-      await Question.findByIdAndUpdate(questionId, {
+      question = await Question.findByIdAndUpdate(questionId, {
         $push: { downvotes: userId },
         $pull: { upvotes: userId },
       });
+      userIncrementAmount = -2;
+      authorIncrementAmount = -20;
     } else {
       // Add downvote if user has neither upvoted or downvoted
-      await Question.findByIdAndUpdate(questionId, {
+      question = await Question.findByIdAndUpdate(questionId, {
         $push: { downvotes: userId },
       });
+      userIncrementAmount = -1;
+      authorIncrementAmount = -10;
     }
+
+    if (userId !== question.author) {
+      await User.findByIdAndUpdate(userId, {
+        $inc: { reputation: userIncrementAmount }
+      });
+  
+      await User.findByIdAndUpdate(question.author, {
+        $inc: { reputation: authorIncrementAmount }
+      });
+    }
+
+
     revalidatePath(path);
   } catch (error) {
     console.log(error);
@@ -286,7 +337,9 @@ export async function deleteQuestion(params: IDeleteQuestionParams) {
 
     const { questionId, path } = params;
 
-    await Question.findByIdAndDelete(questionId);
+    const question = await Question.findOneAndDelete({
+      _id: questionId
+    });
 
     await Answer.deleteMany({
       question: questionId,
@@ -300,6 +353,10 @@ export async function deleteQuestion(params: IDeleteQuestionParams) {
       { questions: questionId },
       { $pull: { questions: questionId } }
     );
+
+    await User.findByIdAndUpdate(question.author, {
+      $inc: { reputation: -5 }
+    });
 
     revalidatePath(path);
   } catch (error) {

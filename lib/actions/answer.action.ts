@@ -6,7 +6,7 @@ import Answer from "@/database/answer.model";
 import Question from "@/database/question.model";
 import { revalidatePath } from "next/cache";
 import User from "@/database/user.model";
-import Interaction from "@/database/interaction.model";
+import Interaction, { INTERACTION_TYPES } from "@/database/interaction.model";
 import { ANSWER_FILTER_VALUES } from "@/constants/filters";
 
 export async function getAnswers(params: IGetAnswersParams) {
@@ -73,13 +73,24 @@ export async function createAnswer(params: ICreateAnswerParams) {
             question
         });
 
-        await Question.findByIdAndUpdate(answer.question, {
+        const answeredQuestion = await Question.findByIdAndUpdate(answer.question, {
             $push: { answers: answer._id }
         });
 
         // Create interaction record for author for answering a question
-
+        await Interaction.create({
+          user: author,
+          action: INTERACTION_TYPES.ANSWER,
+          question,
+          answer: answer._id,
+          tags: answeredQuestion.tags
+        })
         // Increment author's reputation for answering the question
+        if (author !== answeredQuestion.author) {
+          await User.findByIdAndUpdate(author, {
+            $inc: { reputation: 10 }
+          });
+        }
 
         revalidatePath(path);
     } catch (error) {
@@ -92,20 +103,43 @@ export async function upvoteAnswer(params: IAnswerVoteParams) {
     try {
         connectToDatabase();
         const { answerId, userId, hasUpvoted, hasDownvoted, path } = params;
+
+        let answer;
+        let userIncrementAmount;
+        let authorIncrementAmount;
+
         if (hasUpvoted) { // Remove upvote if previously upvoted
-          await Answer.findByIdAndUpdate(answerId, {
+          answer = await Answer.findByIdAndUpdate(answerId, {
             $pull: { upvotes: userId },
           });
+          userIncrementAmount = -1
+          authorIncrementAmount = -10;
         } else if (hasDownvoted) { // Remove downvote and add upvote
-          await Answer.findByIdAndUpdate(answerId, {
+          answer = await Answer.findByIdAndUpdate(answerId, {
             $push: { upvotes: userId },
             $pull: { downvotes: userId }
           });
+          userIncrementAmount = 2;
+          authorIncrementAmount = 20;
         } else { // Add upvote if user has neither upvoted or downvoted
-          await Answer.findByIdAndUpdate(answerId, {
+          answer = await Answer.findByIdAndUpdate(answerId, {
             $push: { upvotes: userId },
           });
+          userIncrementAmount = 1;
+          authorIncrementAmount = 10;
         }
+
+        if (userId !== answer.author) {
+          await User.findByIdAndUpdate(userId, {
+            $inc: { reputation: userIncrementAmount }
+          });
+      
+          await User.findByIdAndUpdate(answer.author, {
+            $inc: { reputation: authorIncrementAmount }
+          });
+        }
+
+
         revalidatePath(path);
     } catch (error) {
         console.log(error);
@@ -117,20 +151,43 @@ export async function upvoteAnswer(params: IAnswerVoteParams) {
     try {
         connectToDatabase();
         const { answerId, userId, hasUpvoted, hasDownvoted, path } = params;
+
+        let answer;
+        let userIncrementAmount;
+        let authorIncrementAmount;
+
         if (hasDownvoted) { // Remove downvote if previously downvoted
-          await Answer.findByIdAndUpdate(answerId, {
+          answer = await Answer.findByIdAndUpdate(answerId, {
             $pull: { downvotes: userId },
           });
+          userIncrementAmount = 1;
+          authorIncrementAmount = 10;
         } else if (hasUpvoted) { // Remove upvote and replace with a downvote
-          await Answer.findByIdAndUpdate(answerId, {
+          answer = await Answer.findByIdAndUpdate(answerId, {
             $push: { downvotes: userId },
             $pull: { upvotes: userId }
           });
+          userIncrementAmount = -2;
+          authorIncrementAmount = -20;
         } else { // Add downvote if user has neither upvoted or downvoted
-          await Answer.findByIdAndUpdate(answerId, {
+          answer = await Answer.findByIdAndUpdate(answerId, {
             $push: { downvotes: userId },
           });
+          userIncrementAmount = -1;
+          authorIncrementAmount = -10;
         }
+
+        if (userId !== answer.author) {
+          await User.findByIdAndUpdate(userId, {
+            $inc: { reputation: userIncrementAmount }
+          });
+      
+          await User.findByIdAndUpdate(answer.author, {
+            $inc: { reputation: authorIncrementAmount }
+          });
+        }
+
+
         revalidatePath(path);
     } catch (error) {
         console.log(error);
@@ -152,7 +209,11 @@ export async function deleteAnswer(params: IDeleteAnswerParams) {
 
     await Interaction.deleteMany({
       answer: answerId
-    })
+    });
+
+    await User.findByIdAndUpdate(answer.author, {
+      $inc: { reputation: -10 }
+    });
     
     revalidatePath(path);
   } catch (error) {

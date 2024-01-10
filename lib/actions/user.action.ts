@@ -294,7 +294,7 @@ export async function getUserQuestions(params: IGetUserStatsParams) {
     });
 
     const questions = await Question.find({ author: userId })
-      .sort({ views: -1, upvotes: -1 })
+      .sort({ views: -1, upvotes: -1, createdAt: -1 })
       .skip(skipAmount)
       .limit(pageSize)
       .populate({ path: "tags", model: Tag, select: "_id name" })

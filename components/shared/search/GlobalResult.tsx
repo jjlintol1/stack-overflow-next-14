@@ -10,7 +10,6 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import { GLOBAL_SEARCH_FILTER_VALUES } from "@/constants/filters";
 import Link from "next/link";
 
-
 interface ISearchResultProps {
   id: string;
   type: string;
