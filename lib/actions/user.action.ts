@@ -17,6 +17,9 @@ import Tag from "@/database/tag.model";
 import { FilterQuery } from "mongoose";
 import Answer from "@/database/answer.model";
 import { QUESTION_FILTER_VALUES, USER_FILTER_VALUES } from "@/constants/filters";
+import { BADGE_CRITERIA_TYPES } from "@/constants";
+import { BadgeCriteriaType } from "@/types";
+import { assignBadges } from "../utils";
 
 export async function getAllUsers(params: IGetAllUsersParams) {
   try {
@@ -271,10 +274,91 @@ export async function getUserInfo(params: IGetUserByIdParams) {
     const totalQuestions = await Question.countDocuments({ author: user._id });
     const totalAnswers = await Answer.countDocuments({ author: user._id });
 
+    const [questionUpvotes] = await Question.aggregate([
+      {
+        $match: {
+          author: userId
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          upvotes: { $size: "$upvotes" }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalUpvotes: { $sum: "$upvotes" }
+        }
+      }
+    ]);
+
+    const [answerUpvotes] = await Answer.aggregate([
+      {
+        $match: {
+          author: userId
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          upvotes: { $size: "$upvotes" }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalUpvotes: { $sum: "$upvotes" }
+        }
+      }
+    ]);
+
+    const [questionViews] = await Answer.aggregate([
+      {
+        $match: {
+          author: userId
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalViews: { $sum: "$views" }
+        }
+      }
+    ]);
+
+    const criteria = [
+      {
+        type: BADGE_CRITERIA_TYPES.QUESTION_COUNT as BadgeCriteriaType,
+        count: totalQuestions
+      },
+      {
+        type: BADGE_CRITERIA_TYPES.ANSWER_COUNT as BadgeCriteriaType,
+        count: totalAnswers
+      },
+      {
+        type: BADGE_CRITERIA_TYPES.QUESTION_UPVOTES as BadgeCriteriaType,
+        count: questionUpvotes?.totalUpvotes || 0
+      },
+      {
+        type: BADGE_CRITERIA_TYPES.ANSWER_UPVOTES as BadgeCriteriaType,
+        count: answerUpvotes?.totalUpvotes || 0
+      },
+      {
+        type: BADGE_CRITERIA_TYPES.TOTAL_VIEWS as BadgeCriteriaType,
+        count: questionViews?.totalViews || 0
+      },
+    ]
+
+    const badgeCounts = assignBadges({ criteria });
+
     return {
       user,
       totalQuestions,
       totalAnswers,
+      badgeCounts,
+      reputation: user.reputation
     };
   } catch (error) {
     console.log(error);

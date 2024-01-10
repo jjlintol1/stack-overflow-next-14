@@ -2,6 +2,8 @@ import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 import queryString from "query-string"
+import { BADGE_CRITERIA } from "@/constants";
+import { IBadgeCounts } from "@/types";
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -104,6 +106,36 @@ export function removeKeysFromQuery({ params, keysToRemove }: IRemoveKeysFromQue
       skipNull: true
     }
   );
+}
+
+interface IBadgeParam {
+  criteria: {
+    type: keyof typeof BADGE_CRITERIA,
+    count: number
+  }[];
+}
+
+export function assignBadges(params: IBadgeParam) {
+  const badgeCounts: IBadgeCounts = {
+    GOLD: 0,
+    SILVER: 0,
+    BRONZE: 0
+  }
+
+  const { criteria } = params;
+
+  criteria.forEach((item) => {
+    const { type, count } = item;
+    const badgeLevels: any = BADGE_CRITERIA[type];
+
+    Object.keys(badgeLevels).forEach((level: any) => {
+      if (count >= badgeLevels[level]) {
+        badgeCounts[level as keyof IBadgeCounts] += 1;
+      }
+    });
+  });
+
+  return badgeCounts;
 }
 
 

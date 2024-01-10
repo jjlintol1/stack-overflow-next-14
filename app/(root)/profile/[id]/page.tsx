@@ -20,7 +20,7 @@ const ProfilePage = async ({ params, searchParams }: IURLProps) => {
     userId: id,
   });
 
-  const { user, totalQuestions, totalAnswers } = result;
+  const { user, totalQuestions, totalAnswers, badgeCounts, reputation } = result;
 
   return (
     <>
@@ -69,9 +69,8 @@ const ProfilePage = async ({ params, searchParams }: IURLProps) => {
       <Stats
         totalQuestions={totalQuestions}
         totalAnswers={totalAnswers}
-        totalGold={100}
-        totalSilver={100}
-        totalBronze={100}
+        badges={badgeCounts}
+        reputation={reputation}
       />
       <div className="mt-10 flex gap-10">
         <Tabs defaultValue="top-posts" className="flex-1">
