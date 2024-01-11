@@ -3,6 +3,13 @@ import { getUserById } from "@/lib/actions/user.action";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import React from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - Edit Developer Profile",
+  description: "Enhance your online presence on DevFlow. Edit your developer profile, update information, and optimize visibility within the developer community.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const EditProfilePage = async () => {
   const { userId } = auth();

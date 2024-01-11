@@ -5,6 +5,13 @@ import { getUserById } from "@/lib/actions/user.action";
 import { IParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs"
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - Edit Your Question",
+  description: "Refine and optimize your questions on DevFlow. Edit for clarity, relevance, and better community engagement. Improve the quality of your queries.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 
 const EditQuestionPage = async ({ params }: IParamsProps) => {

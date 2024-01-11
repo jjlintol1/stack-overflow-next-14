@@ -10,6 +10,13 @@ import { IURLProps } from "@/types";
 import { SignedIn, auth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - My Developer Profile",
+  description: "Showcase your expertise on DevFlow. View your contributions, connect with developers, and establish your presence in the programming community.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const ProfilePage = async ({ params, searchParams }: IURLProps) => {
   const { userId: clerkId } = auth();

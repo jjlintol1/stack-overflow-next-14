@@ -9,6 +9,13 @@ import { getSavedQuestions } from "@/lib/actions/user.action";
 import { ISearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - My Collection | Saved Questions",
+  description: "Access your saved questions and curated knowledge on DevFlow. Build a valuable collection, revisit insights, and stay organized in your coding journey.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const CollectionPage = async ({ searchParams }: ISearchParamsProps) => {
   const { userId } = auth();

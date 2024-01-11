@@ -7,6 +7,13 @@ import { UserFilters } from "@/constants/filters";
 import { getAllUsers } from "@/lib/actions/user.action";
 import { ISearchParamsProps } from "@/types";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - Developer Community Hub",
+  description: "Connect with fellow developers on DevFlow. Explore user profiles, join discussions, and be part of a thriving community dedicated to coding excellence.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const CommunityPage = async ({ searchParams }: ISearchParamsProps) => {
   const page = searchParams?.page || "1";

@@ -17,6 +17,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - Question Details | In-Depth Insights",
+  description: "Explore comprehensive details of a specific question on DevFlow. Gain in-depth insights, find solutions, and participate in meaningful discussions.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
+
 const QuestionDetailsPage = async ({ params, searchParams }: IURLProps) => {
   const { userId } = auth();
 

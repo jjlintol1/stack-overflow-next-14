@@ -7,8 +7,13 @@ import { getQuestionsByTagId } from "@/lib/actions/tag.actions";
 import { IURLProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import React from "react";
+import type { Metadata } from "next";
 
-
+export const metadata: Metadata = {
+  title: "DevFlow - Tag Details | Coding Discussions",
+  description: "Dive into coding discussions on DevFlow. Explore questions associated with a specific tag. Get insights, contribute solutions, and be part of focused coding conversations.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const TagDetailsPage = async ({
   params,

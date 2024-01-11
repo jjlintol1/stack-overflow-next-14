@@ -8,6 +8,13 @@ import { TagFilters } from "@/constants/filters";
 import { getAllTags } from "@/lib/actions/tag.actions";
 import { ISearchParamsProps } from "@/types";
 import React from "react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - Explore Tags | Programming Topics",
+  description: "Browse programming tags on DevFlow. Discover questions related to specific technologies and concepts. Stay updated and connected with your coding interests.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const TagsPage = async ({ searchParams }: ISearchParamsProps) => {
   const page = searchParams?.page || "1";

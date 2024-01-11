@@ -2,8 +2,15 @@ import QuestionForm from '@/components/forms/QuestionForm'
 import { QUESTION_FORM_TYPES } from '@/constants';
 import { getUserById } from '@/lib/actions/user.action';
 import { auth } from '@clerk/nextjs'
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import React from 'react'
+import React from 'react';
+
+export const metadata: Metadata = {
+  title: "DevFlow - Ask a Question | Coding Community",
+  description: "Post coding questions on DevFlow and tap into the collective wisdom of our developer community. Get answers, share insights, and level up your skills.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
 
 const AskQuestionPage = async () => {
   const { userId } = auth();

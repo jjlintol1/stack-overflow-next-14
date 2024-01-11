@@ -12,16 +12,25 @@ import { ISearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DevFlow - Explore Questions | Developer Community",
+  description: "Discover the latest in programming and development on DevFlow. Engage with our developer community, find solutions, and enhance your coding skills.",
+  icons: { icon: "/assets/images/site-logo.svg" },
+};
+
+
 export default async function Home({ searchParams }: ISearchParamsProps) {
   const { userId } = auth();
 
   const page = searchParams?.page || "1";
-  
+
   const result = await getQuestions({
     searchQuery: searchParams?.q,
     filter: searchParams?.filter,
     page: +page,
-    pageSize: 20
+    pageSize: 20,
   });
 
   // TODO: Fetch recommended
