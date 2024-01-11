@@ -73,7 +73,6 @@ const GlobalResult = () => {
             setResult(searchResults?.results);   
         } catch (error) {
             console.log(error);
-            throw error;
         } finally {
             setIsLoading(false);
         }

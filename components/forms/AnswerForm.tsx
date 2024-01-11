@@ -67,6 +67,7 @@ const AnswerForm = ({ mongoUserId, questionId }: IAnswerFormProps) => {
         <Button
           className="background-light800_dark300 flex w-full justify-center gap-1 rounded-[5px] border border-light-700 px-4 py-2.5 dark:border-dark-400 sm:w-fit"
           onClick={() => {}}
+          disabled
         >
           <Image
             src="/assets/icons/stars.svg"
