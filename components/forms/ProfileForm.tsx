@@ -23,6 +23,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { Textarea } from "../ui/textarea";
 import { updateUser } from "@/lib/actions/user.action";
+import { toast } from "../ui/use-toast";
 
 interface IProfileFormProps {
   clerkId: string;
@@ -64,8 +65,15 @@ const ProfileForm = ({ clerkId, profileDetails }: IProfileFormProps) => {
         path: pathname,
       });
       router.push(`/profile/${clerkId}`);
+      toast({
+        title: "Profile successfully updated"
+      });
     } catch (error) {
       console.log(error);
+      toast({
+        title: "Profile update failed",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

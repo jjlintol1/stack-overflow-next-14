@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Editor } from "@tinymce/tinymce-react";
 import { createAnswer } from "@/lib/actions/answer.action";
+import { toast } from "../ui/use-toast";
 
 interface IAnswerFormProps {
   mongoUserId: string;
@@ -51,8 +52,16 @@ const AnswerForm = ({ mongoUserId, questionId }: IAnswerFormProps) => {
         const editor = editorRef.current as any;
         editor.setContent("");
       }
+
+      toast({
+        title: "Answer creation successful"
+      });
     } catch (error) {
       console.log(error);
+      toast({
+        title: "Answer creation failed",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

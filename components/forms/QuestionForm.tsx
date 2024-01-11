@@ -26,6 +26,7 @@ import { useTheme } from "@/context/ThemeProvider";
 import { createQuestion, editQuestion } from "@/lib/actions/question.action";
 import { usePathname, useRouter } from "next/navigation";
 import { QUESTION_FORM_TYPES } from "@/constants";
+import { toast } from "../ui/use-toast";
 
 interface IQuestionFormProps {
   mongoUserId: string;
@@ -99,10 +100,13 @@ const QuestionForm = ({ mongoUserId, type, questionDetails }: IQuestionFormProps
           path: pathname
         });
         router.push(`/question/${parsedQuestionDetails?._id}`);
+        toast({
+          title: "Question successfully updated"
+        });
       } else {
         // make an async call to your API -> create a question
         // contain all form data
-  
+        
         await createQuestion({
           title: values.title,
           content: values.explanation,
@@ -110,13 +114,20 @@ const QuestionForm = ({ mongoUserId, type, questionDetails }: IQuestionFormProps
           author: JSON.parse(mongoUserId),
           path: pathname,
         });
-  
+        
         // navigate to home page
         router.push("/");
+        toast({
+          title: "Question successfully created"
+        });
       }
-
+      
     } catch (error) {
       console.log(error);
+      toast({
+        title: `Question ${type === QUESTION_FORM_TYPES.EDIT ? "update" : "creation"} failed`,
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -12,6 +12,7 @@ import { formatLargeNumber } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { toast } from "../ui/use-toast";
 
 interface IVotesProps {
   type: string;
@@ -36,11 +37,27 @@ const Votes = ({
 }: IVotesProps) => {
   const pathname = usePathname();
 
-  console.log(pathname);
+  const handleSave = async () => {
+    if (hasSaved !== undefined) {
+      toggleSaveQuestion({
+        userId: JSON.parse(userId),
+        questionId: JSON.parse(itemId),
+        hasSaved,
+        path: pathname,
+      });
+      return toast({
+        title: `Question ${hasSaved ? "removed from" : "saved in"} your collection`,
+        variant: hasSaved ? "destructive" : "default"
+      });
+    }
+  }
 
   const handleVote = async (action: string) => {
     if (!userId) {
-      return;
+      return toast({
+        title: "Please log in",
+        description: "You must be logged in to perform this action"
+      });
     }
     if (action === VOTE_ACTION_TYPES.UPVOTE) {
       if (type === VOTES_COMPONENT_TYPES.QUESTION) {
@@ -60,7 +77,10 @@ const Votes = ({
           path: pathname,
         });
       }
-      // TODO: show toast
+      return toast({
+        title: `Upvote ${hasUpvoted ? "removed" : "successful"}`,
+        variant: hasUpvoted ? "destructive" : "default"
+      });
     } else if (action === VOTE_ACTION_TYPES.DOWNVOTE) {
       if (type === VOTES_COMPONENT_TYPES.QUESTION) {
         await downvoteQuestion({
@@ -79,7 +99,10 @@ const Votes = ({
           path: pathname,
         });
       }
-      // TODO: show toast
+      return toast({
+        title: `Downvote ${hasUpvoted ? "removed" : "successful"}`,
+        variant: hasUpvoted ? "destructive" : "default"
+      });
     }
   };
 
@@ -136,14 +159,7 @@ const Votes = ({
           width={18}
           height={18}
           className="cursor-pointer"
-          onClick={() =>
-            toggleSaveQuestion({
-              userId: JSON.parse(userId),
-              questionId: JSON.parse(itemId),
-              hasSaved,
-              path: pathname,
-            })
-          }
+          onClick={handleSave}
         />
       )}
     </div>
