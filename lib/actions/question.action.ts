@@ -10,6 +10,7 @@ import {
   IGetQuestionByIdParams,
   IGetQuestionsParams,
   IQuestionVoteParams,
+  IRecommendedParams,
   IToggleSaveQuestionParams,
 } from "@/types/shared";
 import { revalidatePath } from "next/cache";
@@ -18,7 +19,6 @@ import Answer from "@/database/answer.model";
 import Interaction, { INTERACTION_TYPES } from "@/database/interaction.model";
 import { FilterQuery } from "mongoose";
 import { HOME_PAGE_FILTER_VALUES } from "@/constants/filters";
-
 
 export async function getQuestionById(params: IGetQuestionByIdParams) {
   try {
@@ -58,7 +58,7 @@ export async function getQuestions(params: IGetQuestionsParams) {
         {
           content: { $regex: new RegExp(searchQuery, "i") },
         },
-      ]
+      ];
     }
 
     const sort: any = {};
@@ -73,13 +73,13 @@ export async function getQuestions(params: IGetQuestionsParams) {
       case HOME_PAGE_FILTER_VALUES.UNANSWERED:
         query.answers = {
           $exists: true,
-          $eq: []
+          $eq: [],
         };
         break;
       default:
         break;
     }
-    
+
     const totalQuestions = await Question.countDocuments(query);
 
     const questions = await Question.find(query)
@@ -89,11 +89,11 @@ export async function getQuestions(params: IGetQuestionsParams) {
       .limit(pageSize)
       .sort(sort);
 
-    const isNextQuestions = totalQuestions > skipAmount + questions.length
+    const isNextQuestions = totalQuestions > skipAmount + questions.length;
 
     return {
       questions,
-      isNextQuestions
+      isNextQuestions,
     };
   } catch (error) {
     console.log(error);
@@ -149,11 +149,11 @@ export async function createQuestion(params: ICreateQuestionParams) {
       user: author,
       action: INTERACTION_TYPES.ASK_QUESTION,
       question: question._id,
-      tag: tagDocuments
+      tag: tagDocuments,
     });
     // Increment author's reputation by 5 points for asking a question
     await User.findByIdAndUpdate(author, {
-      $inc: { reputation: 5 }
+      $inc: { reputation: 5 },
     });
 
     // revalidatePath allows you to purge cached data for a specific path
@@ -178,6 +178,11 @@ export async function upvoteQuestion(params: IQuestionVoteParams) {
       });
       userIncrementAmount = -1;
       authorIncrementAmount = -10;
+      await Interaction.findOneAndDelete({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.UPVOTE_QUESTION,
+      });
     } else if (hasDownvoted) {
       // Remove downvote and add upvote
       question = await Question.findByIdAndUpdate(questionId, {
@@ -186,6 +191,17 @@ export async function upvoteQuestion(params: IQuestionVoteParams) {
       });
       userIncrementAmount = 2;
       authorIncrementAmount = 20;
+      await Interaction.findOneAndDelete({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.DOWNVOTE_QUESTION,
+      });
+      await Interaction.create({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.UPVOTE_QUESTION,
+        tags: question.tags,
+      });
     } else {
       // Add upvote if user has neither upvoted or downvoted
       question = await Question.findByIdAndUpdate(questionId, {
@@ -193,18 +209,23 @@ export async function upvoteQuestion(params: IQuestionVoteParams) {
       });
       userIncrementAmount = 1;
       authorIncrementAmount = 10;
+      await Interaction.create({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.UPVOTE_QUESTION,
+        tags: question.tags,
+      });
     }
 
     if (userId !== question.author) {
       await User.findByIdAndUpdate(userId, {
-        $inc: { reputation: userIncrementAmount }
+        $inc: { reputation: userIncrementAmount },
       });
-  
+
       await User.findByIdAndUpdate(question.author, {
-        $inc: { reputation: authorIncrementAmount }
+        $inc: { reputation: authorIncrementAmount },
       });
     }
-
 
     revalidatePath(path);
   } catch (error) {
@@ -229,6 +250,11 @@ export async function downvoteQuestion(params: IQuestionVoteParams) {
       });
       userIncrementAmount = 1;
       authorIncrementAmount = 10;
+      await Interaction.findOneAndDelete({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.DOWNVOTE_QUESTION,
+      });
     } else if (hasUpvoted) {
       // Remove upvote and replace with a downvote
       question = await Question.findByIdAndUpdate(questionId, {
@@ -237,6 +263,17 @@ export async function downvoteQuestion(params: IQuestionVoteParams) {
       });
       userIncrementAmount = -2;
       authorIncrementAmount = -20;
+      await Interaction.findOneAndDelete({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.UPVOTE_QUESTION,
+      });
+      await Interaction.create({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.DOWNVOTE_QUESTION,
+        tags: question.tags,
+      });
     } else {
       // Add downvote if user has neither upvoted or downvoted
       question = await Question.findByIdAndUpdate(questionId, {
@@ -244,18 +281,23 @@ export async function downvoteQuestion(params: IQuestionVoteParams) {
       });
       userIncrementAmount = -1;
       authorIncrementAmount = -10;
+      await Interaction.create({
+        user: userId,
+        question: question._id,
+        action: INTERACTION_TYPES.DOWNVOTE_QUESTION,
+        tags: question.tags,
+      });
     }
 
     if (userId !== question.author) {
       await User.findByIdAndUpdate(userId, {
-        $inc: { reputation: userIncrementAmount }
+        $inc: { reputation: userIncrementAmount },
       });
-  
+
       await User.findByIdAndUpdate(question.author, {
-        $inc: { reputation: authorIncrementAmount }
+        $inc: { reputation: authorIncrementAmount },
       });
     }
-
 
     revalidatePath(path);
   } catch (error) {
@@ -338,7 +380,7 @@ export async function deleteQuestion(params: IDeleteQuestionParams) {
     const { questionId, path } = params;
 
     const question = await Question.findOneAndDelete({
-      _id: questionId
+      _id: questionId,
     });
 
     await Answer.deleteMany({
@@ -355,7 +397,7 @@ export async function deleteQuestion(params: IDeleteQuestionParams) {
     );
 
     await User.findByIdAndUpdate(question.author, {
-      $inc: { reputation: -5 }
+      $inc: { reputation: -5 },
     });
 
     revalidatePath(path);
@@ -372,6 +414,70 @@ export async function getHotQuestions() {
       .limit(5);
 
     return questions;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function getRecommendedQuestions(params: IRecommendedParams) {
+  console.log("Getting recommended questions")
+  try {
+    connectToDatabase();
+    
+    const { userId, page = 1, pageSize = 10, searchQuery } = params;
+
+    const skipAmount = (page - 1) * pageSize;
+    
+    const interactions = await Interaction.find({
+      user: userId
+    });
+    
+    const tagsArrays: string[][] = interactions.map((item) => item.tags);
+    
+    const allTags: string[] = ([] as string[]).concat(...tagsArrays);
+    
+    // @ts-ignore
+    const uniqueTags: string[] = [...new Set(allTags)];
+    
+    const query: FilterQuery<typeof Question> = {
+      $and: [
+        { tags: { $in: uniqueTags } },
+        { author: { $ne: userId } }
+      ]
+    };
+
+    if (searchQuery) {
+      query.$or = [
+        {
+          title: { $regex: new RegExp(searchQuery, "i") },
+        },
+        {
+          content: { $regex: new RegExp(searchQuery, "i") },
+        },
+      ];
+    }
+
+    const totalQuestions = await Question.countDocuments(query);
+
+    const recommendedQuestions = await Question.find(query)
+      .populate({
+        path: 'tags',
+        model: Tag
+      })
+      .populate({
+        path: "author",
+        model: User
+      })
+      .skip(skipAmount)
+      .limit(pageSize);
+
+    const isNextQuestions = totalQuestions > skipAmount + recommendedQuestions.length;
+
+    return {
+      questions: recommendedQuestions,
+      isNextQuestions
+    }
   } catch (error) {
     console.log(error);
     throw error;

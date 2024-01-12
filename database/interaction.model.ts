@@ -5,6 +5,8 @@ export enum INTERACTION_TYPES {
   VIEW = "view",
   ASK_QUESTION = "ask_question",
   ANSWER = "answer",
+  UPVOTE_QUESTION = "upvote_question",
+  DOWNVOTE_QUESTION = "downvote_question",
 }
 /* eslint-enable */
 
@@ -31,7 +33,6 @@ const interactionSchema = new Schema<IInteraction>({
     type: Schema.Types.ObjectId,
     ref: "Question",
   },
-
   answer: {
     type: Schema.Types.ObjectId,
     ref: "Answer",

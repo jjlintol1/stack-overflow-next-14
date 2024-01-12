@@ -6,13 +6,14 @@ import Pagination from "@/components/shared/Pagination";
 import LocalSearch from "@/components/shared/search/LocalSearch";
 import { Button } from "@/components/ui/button";
 import { ICON_POSITION } from "@/constants";
-import { HomePageFilters } from "@/constants/filters";
-import { getQuestions } from "@/lib/actions/question.action";
+import { HOME_PAGE_FILTER_VALUES, HomePageFilters } from "@/constants/filters";
+import { getQuestions, getRecommendedQuestions } from "@/lib/actions/question.action";
 import { ISearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 import Link from "next/link";
 
 import type { Metadata } from "next";
+import { getUserById } from "@/lib/actions/user.action";
 
 export const metadata: Metadata = {
   title: "DevFlow - Explore Questions | Developer Community",
@@ -26,14 +27,35 @@ export default async function Home({ searchParams }: ISearchParamsProps) {
 
   const page = searchParams?.page || "1";
 
-  const result = await getQuestions({
-    searchQuery: searchParams?.q,
-    filter: searchParams?.filter,
-    page: +page,
-    pageSize: 20,
-  });
+  const filter = searchParams?.filter;
 
-  // TODO: Fetch recommended
+  let result;
+
+  if (filter === HOME_PAGE_FILTER_VALUES.RECOMMENDED) {
+    if (userId) {
+      const user = await getUserById({
+        userId
+      });
+      result = await getRecommendedQuestions({
+        userId: user._id,
+        searchQuery: searchParams?.q,
+        page: +page,
+        pageSize: 20
+      });
+    } else {
+      result = {
+        questions: [],
+        isNextQuestions: false
+      }
+    }
+  } else {
+    result = await getQuestions({
+      searchQuery: searchParams?.q,
+      filter,
+      page: +page,
+      pageSize: 20,
+    });
+  }
 
   return (
     <>

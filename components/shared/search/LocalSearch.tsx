@@ -74,7 +74,7 @@ const LocalSearch = ({
         placeholder={placeholder}
         value={debouncedTerm}
         onChange={(e) => setDebouncedTerm(e.target.value)}
-        className="paragraph-regular no-focus placeholder border-none bg-inherit shadow-none outline-none"
+        className="paragraph-regular no-focus placeholder text-dark400_light700 border-none bg-inherit shadow-none outline-none"
       />
       {iconPosition === ICON_POSITION.RIGHT && (
         <Image
