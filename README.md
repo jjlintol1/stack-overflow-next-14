@@ -22,12 +22,12 @@ DevFlow is a modern rendition of the popular developer question and answering fo
 
 ## ⚙️ Features
 
-- ⁉️ **Create question threads:** Authenticated users can create new question threads, like Stack Overflow, and add related tags to group the posts based on topics.
+- ❓ **Create question threads:** Authenticated users can create new question threads, like Stack Overflow, and add related tags to group the posts based on topics.
 - 🗳️ **Upvote and downvote posts:** Users can upvote and downvote questions and answers.
 - 🖥 **Recommendation system for posts:** DevFlow recommends posts to users based on frequently interacted with tags.
 - 🥇 **Badges and reputation:** Users are rewarded with badges and reputation points, incentivizing posting question and answers and interacting with posts.
 - ⚙️ **Filters and pagination:** Almost all pages allow users to curate their search with local search, filtering and pagination.
-- ❓ **Global search:** A user can access data objects such as users, questions, answers and tags from anywhere in the application with the global search mechanism.
+- 🔎 **Global search:** A user can access data objects such as users, questions, answers and tags from anywhere in the application with the global search mechanism.
 - 📱 **Fully mobile responsive:** The app is adaptable to many different screen sizes. Users will have a smooth experience on mobile, tablet, laptop and desktop devices.
 
 ## 📖 Course
