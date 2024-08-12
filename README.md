@@ -5,8 +5,7 @@
 - [Introduction](#introduction)
 - [Tech Stack](#tech-stack)
 - [Features](#features)
-- [How to Test](#how-to-test)
-- [Ways to Improve Application](#ways-to-improve-application)
+- [Course](#course)
 
 ## ▶ Introduction 
 
