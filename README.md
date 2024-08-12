@@ -9,7 +9,7 @@
 
 ## ▶ Introduction 
 
-ClearPay is a Neobanking web app which allows users to connect multiple bank accounts, view their latest transactions, and send money to other users on the app. With ClearPay, there is no longer a need to manually track your expenses, as the app will update your expenses as they are processed by your connected bank account..
+DevFlow is a modern rendition of the popular developer question and answering forum, Stack Overflow. It allows developers a platform to seek help when stuck with a bug or problem, as well as rewarding developers for helping out their peers by answering and interacting with posts through the recommendation system. 
 
 ## 🖥️ Tech Stack
 
