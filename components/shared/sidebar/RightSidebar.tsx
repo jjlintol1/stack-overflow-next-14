@@ -7,7 +7,7 @@ import { getTopPopularTags } from "@/lib/actions/tag.actions";
 
 const QuestionLink = ({ _id, title }: { _id: string; title: string }) => {
   return (
-    <Link href={`/questions/${_id}`} className="flex-between gap-7">
+    <Link href={`/question/${_id}`} className="flex-between gap-7">
       <p className="body-medium text-dark500_light700">{title}</p>
       <Image
         src="/assets/icons/chevron-right.svg"
